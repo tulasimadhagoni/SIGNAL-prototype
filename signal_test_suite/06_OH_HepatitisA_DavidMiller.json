@@ -1,0 +1,93 @@
+﻿{
+    "encounter":  {
+                      "provider_name":  "Dr. Karen O\u0027Connor, MD (Gastroenterology / Hepatology)",
+                      "provider_npi":  "1840291772",
+                      "facility_city":  "Columbus",
+                      "provider_fax":  "614-555-5011",
+                      "admission_date":  "2026-09-14T11:00:00-04:00",
+                      "encounter_id":  "ENC-2026-OH-9021",
+                      "facility_address":  "111 S Grant Ave",
+                      "facility_state":  "OH",
+                      "facility_zip":  "43215",
+                      "facility":  "OhioHealth Grant Medical Center",
+                      "provider_phone":  "614-555-5000"
+                  },
+    "provenance":  {
+                       "event_timestamp":  "2026-09-14T14:22:00-04:00",
+                       "source_system":  "Epic - OhioHealth Hospital Network",
+                       "facility_id":  "OH-COL-43215",
+                       "sha256_hash":  "c01928374a56b20199e4b7c1aefc091823746152bcdef01928374a56b20199e4",
+                       "patient_mpi":  "MPI-OH-4491028"
+                   },
+    "patient":  {
+                    "ethnicity":  "Non-Hispanic/Non-Latino",
+                    "middle_initial":  "E",
+                    "zip_code":  "43215",
+                    "country_of_birth":  "United States",
+                    "date_of_birth":  "1985-05-14",
+                    "age":  41,
+                    "pregnant":  "No",
+                    "race":  "White",
+                    "address":  "382 South High Street, Apt 7",
+                    "primary_language":  "English",
+                    "gender":  "Male",
+                    "sex":  "Male",
+                    "cell_phone":  "614-555-0189",
+                    "state":  "OH",
+                    "home_phone":  "614-555-0128",
+                    "city":  "Columbus",
+                    "email":  "david.miller@example.com",
+                    "occupation":  "Commercial Food Handler / Line Cook (Downtown Columbus Bistro)",
+                    "first_name":  "David",
+                    "last_name":  "Miller"
+                },
+    "governance":  {
+                       "form_name":  "ODH Form HEA 3334 (Confidential Reportable Disease Form)",
+                       "occupational_alert":  "FOOD_HANDLER_EXCLUSION_AND_CONTACT_TRACING_TRIGGERED",
+                       "is_reportable":  true,
+                       "signal_action":  "DISPATCH_EICR_AND_NOTIFY_COLUMBUS_FOOD_PROTECTION_UNIT",
+                       "reportability_confidence":  0.999,
+                       "form_official_link":  "https://odh.ohio.gov/wps/wcm/connect/gov/42a19dc8-9ea9-42b7-8178-57d4cebc37ee/HEA3334.pdf",
+                       "jurisdiction_target":  "Ohio",
+                       "public_health_agency":  "Columbus Public Health / Ohio Department of Health (ODH)",
+                       "statutory_timeframe":  "Class B condition - by end of next business day (Ohio Admin. Code 3701-3-02)"
+                   },
+    "laboratory":  {
+                       "hepatitis_c_antibody":  "Non-Reactive",
+                       "lab_test":  "Acute Hepatitis Panel (Anti-HAV IgM, HBsAg, Anti-HBc IgM, Anti-HCV)",
+                       "laboratory_state":  "OH",
+                       "hepatitis_b_surface_antigen":  "Non-Reactive",
+                       "specimen_type":  "Serum",
+                       "laboratory_name":  "OhioHealth Central Laboratory",
+                       "lab_result":  "Reactive / Positive",
+                       "date_first_specimen_collection":  "2026-09-14",
+                       "hepatitis_b_core_igm":  "Non-Reactive",
+                       "lab_loinc":  "22314-9",
+                       "ast_sgot":  "1,890 U/L (Reference 10-40)",
+                       "alt_sgpt":  "2,450 U/L (Reference 7-56)",
+                       "laboratory_city":  "Columbus",
+                       "laboratory_zip":  "43215",
+                       "anti_hav_igm":  "Reactive (Index: 5.82, Reference \u003c0.80)",
+                       "laboratory_clia":  "36D0654128",
+                       "total_bilirubin":  "6.8 mg/dL (Reference 0.1-1.2)",
+                       "specimen_date":  "2026-09-14"
+                   },
+    "case_id":  "SIG-CASE-2026-OH006",
+    "clinical":  {
+                     "occupational_risk_flag":  "HIGH - Active Food Service Employee (worked shifts while symptomatic on Sept 7-9)",
+                     "clinical_notes":  "41-year-old commercial line cook presents with 8-day progression of flu-like fatigue followed by acute jaundice and dark urine. Liver enzymes severely elevated (ALT \u003e2400). Serology confirms acute Hepatitis A IgM. Due to direct commercial food handling while symptomatic, rapid public health coordination is mandated for potential restaurant patron post-exposure prophylaxis.",
+                     "icd10_code":  "B15.9",
+                     "diagnosis_date":  "2026-09-14",
+                     "current_treatment":  "Supportive care, hydration, liver enzyme monitoring, strict work exclusion until medically cleared",
+                     "snomed_code":  "40468003",
+                     "symptom_onset":  "2026-09-06",
+                     "diagnosis":  "Acute Hepatitis A Virus Infection with Jaundice",
+                     "symptoms_present":  [
+                                              "Frank Scleral Icterus \u0026 Generalized Cutaneous Jaundice",
+                                              "Dark Tea-Colored Urine",
+                                              "Acholic / Pale Stools",
+                                              "Right Upper Quadrant Abdominal Tenderness",
+                                              "Profound Anorexia, Nausea, and Malaise"
+                                          ]
+                 }
+}

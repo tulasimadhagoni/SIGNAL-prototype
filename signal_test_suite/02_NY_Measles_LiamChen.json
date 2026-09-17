@@ -1,0 +1,91 @@
+﻿{
+    "encounter":  {
+                      "provider_name":  "Dr. Emily Ross, MD (Pediatrics)",
+                      "provider_npi":  "1839201994",
+                      "facility_city":  "Brooklyn",
+                      "provider_fax":  "718-555-3410",
+                      "admission_date":  "2026-09-14T08:30:00-04:00",
+                      "encounter_id":  "ENC-2026-NY-4481",
+                      "facility_address":  "121 Dekalb Ave",
+                      "facility_state":  "NY",
+                      "facility_zip":  "11201",
+                      "facility":  "Brooklyn Pediatric Specialty Center",
+                      "provider_phone":  "718-555-3400"
+                  },
+    "provenance":  {
+                       "event_timestamp":  "2026-09-14T10:18:00-04:00",
+                       "source_system":  "Epic EHR v2026 - Brooklyn Health System",
+                       "facility_id":  "NY-BK-11201",
+                       "sha256_hash":  "a4f10928bbcf01e4a500918cf5e408892110cbe8492019ffea829031024bc601",
+                       "patient_mpi":  "MPI-NY-7740192"
+                   },
+    "patient":  {
+                    "ethnicity":  "Non-Hispanic/Non-Latino",
+                    "middle_initial":  "J",
+                    "zip_code":  "11217",
+                    "country_of_birth":  "United States",
+                    "date_of_birth":  "2022-04-12",
+                    "age":  4,
+                    "pregnant":  "No",
+                    "race":  "Asian",
+                    "address":  "452 Atlantic Avenue, Apt 2",
+                    "primary_language":  "Mandarin / English",
+                    "gender":  "Male",
+                    "sex":  "Male",
+                    "cell_phone":  "917-555-0129",
+                    "state":  "NY",
+                    "home_phone":  "718-555-0182",
+                    "city":  "Brooklyn",
+                    "email":  "chen.family@example.com",
+                    "occupation":  "Daycare Attendee (Little Stars Learning Center)",
+                    "first_name":  "Liam",
+                    "last_name":  "Chen"
+                },
+    "governance":  {
+                       "form_name":  "DOH-389 (Communicable Disease Reporting Form)",
+                       "signal_action":  "TRIGGER_IMMEDIATE_PHONE_ALERT_AND_DISPATCH_EICR",
+                       "is_reportable":  true,
+                       "reportability_confidence":  0.999,
+                       "form_official_link":  "https://www.health.ny.gov/forms/doh-389.pdf",
+                       "urgency_level":  "URGENT_IMMEDIATE_PHONE_REQUIRED",
+                       "jurisdiction_target":  "New York State",
+                       "public_health_agency":  "New York State Department of Health (NYSDOH) / NYC DOHMH",
+                       "statutory_timeframe":  "IMMEDIATE TELEPHONE NOTIFICATION (\u003c2 hours, written within 24h per 10 NYCRR Â§ 2.10)"
+                   },
+    "laboratory":  {
+                       "rt_pcr_measles_rna":  "Positive (Cycle Threshold: 22.4)",
+                       "specimen_type":  "Nasopharyngeal Swab \u0026 Serum",
+                       "lab_test":  "Measles Virus RNA by RT-PCR \u0026 Measles IgM Antibody",
+                       "serum_measles_igm":  "Positive (Index: 3.42, Reference \u003c0.90)",
+                       "lab_result":  "Positive (Detected)",
+                       "laboratory_zip":  "10016",
+                       "lab_loinc":  "75865-6",
+                       "serum_measles_igg":  "Negative",
+                       "laboratory_city":  "New York",
+                       "laboratory_name":  "New York City Public Health Laboratory / Wadsworth Center",
+                       "laboratory_state":  "NY",
+                       "laboratory_clia":  "33D0652819",
+                       "date_first_specimen_collection":  "2026-09-14",
+                       "specimen_date":  "2026-09-14"
+                   },
+    "case_id":  "SIG-CASE-2026-NY002",
+    "clinical":  {
+                     "clinical_notes":  "4-year-old unimmunized male brought by mother with 4-day history of escalating fever, barking cough, bilateral conjunctival injection, and profuse coryza. Today developed distinct erythematous maculopapular rash spreading from hairline and behind ears down to trunk. Intraoral examination reveals pathognomonic Koplik spots opposite molars. Airborne isolation instituted immediately.",
+                     "fever_max":  "103.8 F",
+                     "icd10_code":  "B05.9",
+                     "diagnosis_date":  "2026-09-14",
+                     "travel_history":  "Recent return 11 days prior from international flight via JFK Airport terminal 4",
+                     "immunization_status":  "Unvaccinated (Zero MMR Doses - Parental Exemption)",
+                     "snomed_code":  "14189004",
+                     "symptom_onset":  "2026-09-10",
+                     "diagnosis":  "Measles (Rubeola)",
+                     "symptoms_present":  [
+                                              "High Fever",
+                                              "Cough",
+                                              "Coryza",
+                                              "Conjunctivitis with Photophobia",
+                                              "Koplik Spots on Buccal Mucosa",
+                                              "Maculopapular Descending Rash"
+                                          ]
+                 }
+}

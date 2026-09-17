@@ -1,0 +1,89 @@
+﻿{
+    "encounter":  {
+                      "provider_name":  "Dr. Roberto Garza, MD (Pediatric Pulmonology)",
+                      "provider_npi":  "1720194821",
+                      "facility_city":  "Austin",
+                      "provider_fax":  "512-555-7209",
+                      "admission_date":  "2026-09-13T11:20:00-05:00",
+                      "encounter_id":  "ENC-2026-TX-8820",
+                      "facility_address":  "1500 Red River St",
+                      "facility_state":  "TX",
+                      "facility_zip":  "78701",
+                      "facility":  "Austin Regional Children\u0027s Health Center",
+                      "provider_phone":  "512-555-7200"
+                  },
+    "provenance":  {
+                       "event_timestamp":  "2026-09-13T16:05:00-05:00",
+                       "source_system":  "Cerner Millennium - Central Texas Health",
+                       "facility_id":  "TX-ATX-78701",
+                       "sha256_hash":  "c8e1047120aefb73891001bc994208a192837bcde01928374a56b20199e4b7c1",
+                       "patient_mpi":  "MPI-TX-6629104"
+                   },
+    "patient":  {
+                    "ethnicity":  "Hispanic or Latino",
+                    "middle_initial":  "M",
+                    "zip_code":  "78741",
+                    "country_of_birth":  "United States",
+                    "date_of_birth":  "2026-07-02",
+                    "age_months":  2,
+                    "race":  "White",
+                    "address":  "1704 East Riverside Drive, Unit 312",
+                    "primary_language":  "Spanish / English",
+                    "gender":  "Female",
+                    "sex":  "Female",
+                    "cell_phone":  "512-555-0183",
+                    "state":  "TX",
+                    "email":  "rodriguez.m@example.com",
+                    "home_phone":  "512-555-0177",
+                    "city":  "Austin",
+                    "pregnant":  "No",
+                    "occupation":  "Infant (Home Care)",
+                    "first_name":  "Sofia",
+                    "last_name":  "Rodriguez"
+                },
+    "governance":  {
+                       "jurisdiction_target":  "Texas",
+                       "form_official_link":  "https://www.dshs.texas.gov/sites/default/files/IDCU/investigation/conditions/EPI-2_Form.pdf",
+                       "public_health_agency":  "Texas Department of State Health Services (DSHS) Region 7 / Austin Public Health",
+                       "signal_action":  "GENERATE_EICR_AND_POPULATE_TEXAS_EPI2",
+                       "statutory_timeframe":  "1 working day (25 Tex. Admin. Code Â§ 97.3)",
+                       "is_reportable":  true,
+                       "form_name":  "EPI-2 Initial Provider Disease Report Form",
+                       "reportability_confidence":  0.997
+                   },
+    "laboratory":  {
+                       "specimen_type":  "Nasopharyngeal Aspirate / Swab",
+                       "lab_test":  "Bordetella pertussis DNA by Real-Time PCR",
+                       "pertussis_pcr_result":  "Positive",
+                       "lab_result":  "Positive (Bordetella pertussis DNA Detected)",
+                       "laboratory_zip":  "78728",
+                       "lab_loinc":  "31963-2",
+                       "laboratory_city":  "Austin",
+                       "laboratory_name":  "Clinical Pathology Laboratories (CPL Austin)",
+                       "laboratory_state":  "TX",
+                       "laboratory_clia":  "45D0659871",
+                       "b_parapertussis_pcr":  "Negative",
+                       "white_blood_cell_count":  "28,400 / mcL (Marked Absolute Lymphocytosis 74%)",
+                       "date_first_specimen_collection":  "2026-09-13",
+                       "specimen_date":  "2026-09-13"
+                   },
+    "case_id":  "SIG-CASE-2026-TX003",
+    "clinical":  {
+                     "immunization_history":  "1st DTaP dose received 5 days prior to visit (partial immunity)",
+                     "treatment_status":  "Azithromycin oral suspension prescribed for 5 days; post-exposure prophylaxis prescribed for household",
+                     "clinical_notes":  "2-month-old infant brought with 12-day cough that worsened into violent coughing spasms accompanied by high-pitched inspiratory gasp (\u0027whoop\u0027) followed by post-tussive emesis and perioral cyanosis. Mother notes 7-year-old sibling has had persistent unremitting cough. Hospitalized for cardiopulmonary monitoring.",
+                     "icd10_code":  "A37.00",
+                     "household_contacts":  "Older brother aged 7 has experienced chronic lingering cough for 3 weeks",
+                     "diagnosis_date":  "2026-09-13",
+                     "snomed_code":  "27836007",
+                     "symptom_onset":  "2026-08-31",
+                     "diagnosis":  "Pertussis (Whooping Cough)",
+                     "symptoms_present":  [
+                                              "Severe Paroxysmal Coughing Fits",
+                                              "Inspiratory Whoop",
+                                              "Post-Tussive Vomiting",
+                                              "Facial Petechiae",
+                                              "Brief Apnea / Cyanosis Episodes"
+                                          ]
+                 }
+}

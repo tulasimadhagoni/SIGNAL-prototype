@@ -1,0 +1,88 @@
+﻿{
+    "encounter":  {
+                      "provider_name":  "Dr. Kevin Patel, MD (Family Medicine)",
+                      "provider_npi":  "1592018841",
+                      "facility_city":  "Austin",
+                      "provider_fax":  "512-555-2109",
+                      "admission_date":  "2026-09-14T10:30:00-05:00",
+                      "encounter_id":  "ENC-2026-TX-3319",
+                      "facility_address":  "2200 S Congress Ave",
+                      "facility_state":  "TX",
+                      "facility_zip":  "78704",
+                      "facility":  "SoCo Urgent Care Center",
+                      "provider_phone":  "512-555-2100"
+                  },
+    "provenance":  {
+                       "event_timestamp":  "2026-09-14T11:15:00-05:00",
+                       "source_system":  "NextGen Healthcare EHR - Austin Community Care",
+                       "facility_id":  "TX-ATX-78704",
+                       "sha256_hash":  "d91823746152bcdef01928374a56b20199e4b7c1aefc091823746152bcdef019",
+                       "patient_mpi":  "MPI-TX-1029481"
+                   },
+    "patient":  {
+                    "ethnicity":  "Non-Hispanic/Non-Latino",
+                    "middle_initial":  "E",
+                    "zip_code":  "78704",
+                    "country_of_birth":  "United States",
+                    "date_of_birth":  "2001-08-19",
+                    "age":  25,
+                    "pregnant":  "No",
+                    "race":  "White",
+                    "address":  "2103 South Congress Ave, Apt 14",
+                    "primary_language":  "English",
+                    "gender":  "Female",
+                    "sex":  "Female",
+                    "cell_phone":  "512-555-0143",
+                    "state":  "TX",
+                    "home_phone":  "512-555-0191",
+                    "city":  "Austin",
+                    "email":  "sarah.jenkins@example.com",
+                    "occupation":  "Graphic Designer (Remote Work)",
+                    "first_name":  "Sarah",
+                    "last_name":  "Jenkins"
+                },
+    "governance":  {
+                       "jurisdiction_target":  "Texas (Texas DSHS / Austin Public Health)",
+                       "suppression_reason":  "Condition (Acute Viral Pharyngitis, ICD-10 J02.9) and all associated microbiology results are non-notifiable under Texas Health \u0026 Safety Code Chapter 81 and CDC NNDSS guidelines.",
+                       "evaluation_result":  "NOT REPORTABLE / DISMISSED",
+                       "rckms_decision_support_code":  "RCKMS-DISP-000 (No Trigger Condition Matched)",
+                       "signal_action":  "LOG_AUDIT_LEDGER_ONLY_DO_NOT_ALERT_OR_SUBMIT",
+                       "statutory_timeframe":  "N/A - Non-reportable illness",
+                       "is_reportable":  false,
+                       "reportability_confidence":  0
+                   },
+    "laboratory":  {
+                       "specimen_type":  "Throat Swab \u0026 Anterior Nasal Swab",
+                       "lab_test":  "Rapid Strep A Antigen \u0026 Multiplex COVID-19 / Flu A+B Molecular Assay",
+                       "lab_result":  "Negative across all targets",
+                       "laboratory_zip":  "78704",
+                       "lab_loinc":  "6556-5",
+                       "influenza_a_rna":  "Not Detected (Negative)",
+                       "strep_a_antigen":  "Negative (No Group A Streptococcus antigen detected)",
+                       "laboratory_city":  "Austin",
+                       "influenza_b_rna":  "Not Detected (Negative)",
+                       "laboratory_name":  "SoCo Urgent Care Point-of-Care Laboratory",
+                       "laboratory_state":  "TX",
+                       "laboratory_clia":  "45D2190841",
+                       "sars_cov_2_rna":  "Not Detected (Negative)",
+                       "date_first_specimen_collection":  "2026-09-14",
+                       "specimen_date":  "2026-09-14"
+                   },
+    "case_id":  "SIG-CASE-2026-NR007",
+    "clinical":  {
+                     "treatment_status":  "Symptomatic relief only (warm saline gargles, throat lozenges, acetaminophen as needed, rest, hydration)",
+                     "clinical_notes":  "25-year-old female presents with 48-hour history of mild sore throat and runny nose after working in air-conditioned office. Diagnostic testing for Group A Strep and respiratory viral panel (COVID/Flu) are negative. Benign, self-limited viral URI. Patient reassured and advised to return if symptoms worsen or high fevers develop.",
+                     "icd10_code":  "J02.9",
+                     "diagnosis_date":  "2026-09-14",
+                     "physical_exam":  "Posterior oropharynx mildly erythematous without tonsillar enlargement, no exudates, no palatal petechiae, anterior cervical lymph nodes non-tender and \u003c1 cm. Lungs clear to auscultation bilaterally. Centor Score = 0 (low risk for bacterial pharyngitis).",
+                     "snomed_code":  "195662009",
+                     "symptom_onset":  "2026-09-12",
+                     "diagnosis":  "Acute Non-Specific Viral Pharyngitis / Upper Respiratory Tract Infection",
+                     "symptoms_present":  [
+                                              "Mild Scratchy Sore Throat",
+                                              "Clear Rhinorrhea and Nasal Congestion",
+                                              "Low-Grade Temperature (99.2 F)",
+                                              "Mild Non-Productive Dry Cough"
+                                          ]
+                 }
+}

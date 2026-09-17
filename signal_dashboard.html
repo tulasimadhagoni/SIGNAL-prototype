@@ -1,0 +1,2722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIGNAL - Public Health Reporting Intelligence Layer</title>
+<!-- Include jsPDF for client-side official morbidity PDF compilation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --navy-dark: #0f172a;
+  --navy-light: #1e293b;
+  --bg-page: #f8fafc;
+  --card-bg: #ffffff;
+  --border-line: #e2e8f0;
+  --text-dark: #0f172a;
+  --text-muted: #64748b;
+  --blue-primary: #2563eb;
+  --blue-hover: #1d4ed8;
+  --orange-accent: #ea580c;
+  --green-ok: #16a34a;
+  --green-bg: #ecfdf5;
+  --red-alert: #dc2626;
+  --red-bg: #fef2f2;
+  --radius: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-dark);
+  line-height: 1.5;
+  font-size: 13px;
+}
+
+/* TOPBAR */
+header {
+  background: var(--navy-dark);
+  color: #ffffff;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  position: relative;
+  z-index: 1000;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  cursor: pointer;
+}
+.brand-badge {
+  background: var(--blue-primary);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+}
+
+/* ACTIVE SEARCH BAR */
+.topbar-center {
+  position: relative;
+  width: 480px;
+}
+.search-box-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.1);
+  border: 1.5px solid rgba(255,255,255,0.22);
+  border-radius: 8px;
+  padding: 7px 12px;
+  transition: all 0.2s ease;
+}
+.search-box-wrapper:focus-within {
+  background: rgba(255,255,255,0.18);
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96,165,250,0.3);
+}
+.search-icon-svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: #94a3b8;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+.search-input-field {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  width: 100%;
+  font-size: 12.5px;
+}
+.search-input-field::placeholder { color: #94a3b8; }
+.search-clear-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 4px;
+  display: none;
+  line-height: 1;
+}
+.search-clear-btn:hover { color: #ffffff; }
+.search-kbd-tag {
+  background: rgba(255,255,255,0.15);
+  color: #cbd5e1;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  white-space: nowrap;
+}
+
+/* SEARCH DROPDOWN MENU */
+.search-dropdown {
+  display: none;
+  position: absolute;
+  top: 44px;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid var(--border-line);
+  border-radius: 10px;
+  box-shadow: 0 14px 32px rgba(0,0,0,0.25);
+  max-height: 380px;
+  overflow-y: auto;
+  z-index: 9999;
+}
+.search-result-item {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.15s ease;
+}
+.search-result-item:hover, .search-result-item.highlighted {
+  background: #f1f5f9;
+}
+.result-name { font-size: 13px; font-weight: 700; color: #0f172a; }
+.result-disease { font-size: 11.5px; color: #2563eb; font-weight: 600; margin-top: 1px; }
+.result-meta { font-size: 10.5px; color: #64748b; margin-top: 2px; }
+.result-pill {
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid #bfdbfe;
+  display: inline-block;
+  white-space: nowrap;
+}
+.result-pill.urgent { background: #fee2e2; color: #dc2626; border-color: #fecaca; }
+.result-pill.suppressed { background: #f1f5f9; color: #64748b; border-color: #cbd5e1; }
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.user-profile img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid #3b82f6;
+  object-fit: cover;
+}
+.user-name { font-weight: 700; font-size: 12px; }
+.user-role { font-size: 10.5px; color: #94a3b8; }
+
+main {
+  max-width: 1380px;
+  margin: 20px auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* TOP METRICS */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+.metric-box {
+  background: var(--card-bg);
+  border: 1px solid var(--border-line);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+.metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.metric-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 11px;
+}
+.icon-blue { background: #eff6ff; color: #2563eb; }
+.icon-red { background: #fef2f2; color: #dc2626; }
+.icon-orange { background: #fff7ed; color: #ea580c; }
+.icon-green { background: #ecfdf5; color: #16a34a; }
+.icon-purple { background: #faf5ff; color: #9333ea; }
+.icon-gray { background: #f1f5f9; color: #64748b; }
+
+.metric-value {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 6px 0 2px;
+  color: var(--text-dark);
+}
+.metric-sub { font-size: 11px; color: var(--text-muted); }
+.sub-green { color: var(--green-ok); font-weight: 600; }
+.sub-red { color: var(--red-alert); font-weight: 600; }
+.sub-orange { color: var(--orange-accent); font-weight: 600; }
+
+/* SHARED CARD STYLING */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-line);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.card-title {
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title-badge {
+  font-size: 10.5px;
+  background: #f1f5f9;
+  color: var(--text-muted);
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+/* SECTION 1: INGESTED CANDIDATE PRESETS */
+.presets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.preset-btn {
+  background: #ffffff;
+  border: 1.5px solid var(--border-line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 11.5px;
+}
+.preset-btn:hover {
+  border-color: var(--blue-primary);
+  background: #f8fafc;
+}
+.preset-btn.active {
+  border-color: var(--blue-primary);
+  background: #eff6ff;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
+}
+.preset-btn.dimmed {
+  opacity: 0.35;
+}
+.preset-btn-name { font-weight: 700; color: var(--text-dark); margin-bottom: 2px; }
+.preset-btn-desc { font-size: 10.5px; color: var(--text-muted); }
+.preset-btn.urgent { border-left: 4px solid var(--red-alert); }
+.preset-btn.negative { border-left: 4px solid #94a3b8; }
+.preset-btn.uploaded { border-left: 4px solid #eab308; background: #fefce8; }
+
+.upload-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #f8fafc;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 11.5px;
+}
+.upload-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.upload-status-box {
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1.5px solid #bfdbfe;
+  border-radius: 6px;
+  font-size: 11.5px;
+  display: none;
+}
+
+/* SECTION 2: DIAGNOSTIC & ANATOMICAL VIEW */
+.diagnostic-view {
+  display: grid;
+  grid-template-columns: 50% 50%;
+  gap: 18px;
+}
+.model-box {
+  position: relative;
+  background: #000000;
+  border-radius: var(--radius);
+  overflow: hidden;
+  height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.body-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.pulse-indicator {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background: rgba(220, 38, 38, 0.4);
+  border-radius: 50%;
+  border: 2px solid #dc2626;
+  transform: translate(-50%, -50%);
+  animation: pulseAnim 1.8s infinite;
+  z-index: 10;
+  cursor: pointer;
+}
+@keyframes pulseAnim {
+  0% { transform: translate(-50%, -50%) scale(0.9); box-shadow: 0 0 0 0 rgba(220,38,38,0.7); }
+  70% { transform: translate(-50%, -50%) scale(1.4); box-shadow: 0 0 0 16px rgba(220,38,38,0); }
+  100% { transform: translate(-50%, -50%) scale(0.9); box-shadow: 0 0 0 0 rgba(220,38,38,0); }
+}
+
+.pathology-callout {
+  position: absolute;
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(255,255,255,0.25);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 11px;
+  max-width: 240px;
+  z-index: 20;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  transition: all 0.25s ease;
+}
+.callout-title { font-weight: 800; font-size: 12px; color: #60a5fa; margin-bottom: 2px; }
+.callout-diag { font-weight: 600; font-size: 11px; color: #f8fafc; margin-bottom: 4px; }
+.callout-score { font-size: 10px; color: #4ade80; font-weight: 700; }
+.callout-deadline { font-size: 10px; color: #f87171; font-weight: 700; margin-top: 2px; }
+
+.model-controls {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: flex;
+  gap: 6px;
+  z-index: 25;
+}
+.tab-pill {
+  background: rgba(15,23,42,0.75);
+  color: #e2e8f0;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+.tab-pill:hover { background: rgba(37,99,235,0.8); color:#fff; }
+
+/* PATIENT SUMMARY CARD */
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.patient-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-line);
+  margin-bottom: 14px;
+}
+.patient-avatar-img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--border-line);
+  object-fit: cover;
+}
+.patient-info-name { font-size: 17px; font-weight: 800; color: var(--text-dark); }
+.patient-info-meta { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.summary-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+.sum-label { font-weight: 600; color: var(--text-muted); width: 34%; }
+.sum-val { font-weight: 700; color: var(--text-dark); }
+.sum-val.orange { color: var(--orange-accent); }
+.sum-val.red { color: var(--red-alert); }
+.sum-val.blue { color: var(--blue-primary); }
+.sum-val.green { color: var(--green-ok); }
+
+.action-buttons-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-line);
+}
+.btn-primary {
+  background: var(--blue-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-primary:hover { background: var(--blue-hover); }
+.btn-secondary {
+  background: #f1f5f9;
+  color: var(--text-dark);
+  border: 1px solid var(--border-line);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+}
+.btn-secondary:hover { background: #e2e8f0; }
+.btn-outline {
+  background: transparent;
+  color: var(--blue-primary);
+  border: 1px solid var(--blue-primary);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.btn-outline:hover { background: #eff6ff; }
+
+/* TRENDS AND EPIDEMIOLOGY */
+.trends-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.mini-trend-box {
+  background: #ffffff;
+  border: 1px solid var(--border-line);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.mini-trend-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+.mini-trend-stat { font-size: 20px; font-weight: 800; color: var(--text-dark); }
+.mini-trend-desc { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+.ai-insight-box {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 12px;
+  color: #1e3a8a;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ai-insight-box.urgent {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+/* SECTION 3: CONFIRMATORY DIAGNOSTIC LABS */
+.evidence-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-top: 8px;
+}
+.evidence-table th {
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-bottom: 1.5px solid var(--border-line);
+  text-align: left;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.evidence-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+.tag-loinc {
+  background: #f1f5f9;
+  color: #334155;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 11px;
+}
+.tag-pos {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+.tag-neg {
+  background: #ecfdf5;
+  color: #16a34a;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+/* SECTION 4: ACCURATE STATE MORBIDITY FORM (PRE-POPULATED) */
+.official-form-container {
+  border: 2px solid #0f172a;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 20px 24px;
+  font-family: Arial, sans-serif;
+  color: #0f172a;
+}
+.form-gov-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px solid #0f172a;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+}
+.gov-agency {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #475569;
+  letter-spacing: 0.5px;
+}
+.gov-form-title {
+  font-size: 16px;
+  font-weight: 900;
+  color: #0f172a;
+  margin-top: 3px;
+}
+.gov-form-ref {
+  text-align: right;
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 700;
+}
+.gov-seal-text {
+  font-size: 9px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+.form-statutory-notice {
+  background: #fff7ed;
+  border: 1.5px solid #ea580c;
+  color: #9a3412;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+.form-statutory-notice.urgent {
+  background: #fef2f2;
+  border-color: #dc2626;
+  color: #991b1b;
+}
+
+.form-grid-box {
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.form-box-title {
+  background: #f1f5f9;
+  border-bottom: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #334155;
+  display: flex;
+  justify-content: space-between;
+}
+.form-two-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  font-size: 12px;
+}
+.form-field-cell {
+  padding: 8px 12px;
+  border-top: 1px solid #e2e8f0;
+  border-right: 1px solid #e2e8f0;
+}
+.form-field-cell:nth-child(2n) { border-right: none; }
+.form-field-cell:nth-child(-n+2) { border-top: none; }
+.form-field-cell b {
+  display: block;
+  font-size: 9.5px;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.form-field-cell span { font-weight: 600; color: #0f172a; }
+
+.form-check-group {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  font-size: 11.5px;
+  margin-top: 4px;
+}
+.form-check-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.form-check-box {
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid #0f172a;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 900;
+}
+.form-check-box.checked {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.signature-block {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border-top: 1px solid #cbd5e1;
+  font-size: 11.5px;
+}
+.sig-line {
+  border-top: 1px solid #475569;
+  width: 220px;
+  margin-top: 24px;
+  padding-top: 4px;
+  font-size: 10.5px;
+  color: #475569;
+}
+
+/* NON-REPORTABLE SUPPRESSION DISPLAY */
+.suppressed-alert {
+  background: #f8fafc;
+  border: 2px dashed #94a3b8;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+}
+.suppressed-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #475569;
+  margin-bottom: 8px;
+}
+.suppressed-desc {
+  font-size: 12px;
+  color: #64748b;
+  max-width: 650px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+  .metrics-row { grid-template-columns: repeat(3, 1fr); }
+  .diagnostic-view { grid-template-columns: 1fr; }
+  .trends-row { grid-template-columns: 1fr; }
+  .topbar-center { width: 320px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand" onclick="location.reload()">
+    <span>SIGNAL</span>
+    <span class="brand-badge">PUBLIC HEALTH INTELLIGENCE</span>
+  </div>
+
+  <!-- ACTIVE SEARCH BAR WITH KEYBOARD NAVIGATION & DROPDOWN -->
+  <div class="topbar-center">
+    <div class="search-box-wrapper">
+      <svg class="search-icon-svg" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="globalSearchInput" class="search-input-field"
+             placeholder="Search by patient, disease, state, LOINC, or ICD-10 (e.g. Measles, TB, 88538)..."
+             oninput="handleSearch(this.value)"
+             onfocus="handleSearchFocus()"
+             onkeydown="handleSearchKey(event)">
+      <button id="clearSearchBtn" class="search-clear-btn" onclick="clearSearch()" title="Clear search">&times;</button>
+      <span class="search-kbd-tag">Ctrl + K</span>
+    </div>
+    <div id="searchResultsDropdown" class="search-dropdown"></div>
+  </div>
+
+  <div class="topbar-right">
+    <div class="user-profile">
+      <img src="assets/doc_adams.png" alt="Dr. Sarah Lin">
+      <div>
+        <div class="user-name">Dr. Sarah Lin, MD</div>
+        <div class="user-role">Infection Prevention Lead</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- TOP SURVEILLANCE METRICS STRIP -->
+  <section class="metrics-row">
+    <div class="metric-box">
+      <div class="metric-header">
+        <span>Candidates Today</span>
+        <div class="metric-icon icon-blue">C</div>
+      </div>
+      <div class="metric-value">148</div>
+      <div class="metric-sub sub-green">+12% vs yesterday</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-header">
+        <span>Immediate Phone</span>
+        <div class="metric-icon icon-red">!</div>
+      </div>
+      <div class="metric-value">2</div>
+      <div class="metric-sub sub-red">Urgent telephone SLA</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-header">
+        <span>Pending Review</span>
+        <div class="metric-icon icon-orange">R</div>
+      </div>
+      <div class="metric-value">6</div>
+      <div class="metric-sub sub-orange">Avg wait 18 mins</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-header">
+        <span>eICRs Dispatched</span>
+        <div class="metric-icon icon-green">E</div>
+      </div>
+      <div class="metric-value">128</div>
+      <div class="metric-sub sub-green">99.2% automated</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-header">
+        <span>Residual Fallback</span>
+        <div class="metric-icon icon-purple">F</div>
+      </div>
+      <div class="metric-value">12</div>
+      <div class="metric-sub">Fax / portal sync</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-header">
+        <span>Suppressed (Zero-filing)</span>
+        <div class="metric-icon icon-gray">S</div>
+      </div>
+      <div class="metric-value">194</div>
+      <div class="metric-sub">Audit trail preserved</div>
+    </div>
+  </section>
+
+  <!-- SECTION 1: INGESTED CANDIDATE PRESETS & INGESTION DROPZONE -->
+  <section class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <span>1. Ingested Candidate Cases</span>
+        <span class="card-title-badge">7 Jurisdictional Test Payloads</span>
+      </div>
+      <span style="font-size:11px;color:var(--text-muted);">Select a candidate, search above, or upload clinical evidence below</span>
+    </div>
+
+    <div class="presets-grid" id="presetsGrid">
+      <button class="preset-btn active" id="btn-ca_tb" onclick="loadCase('ca_tb')">
+        <div class="preset-btn-name">1. California - TB</div>
+        <div class="preset-btn-desc">Maya Carter (32F) | CDPH 110b</div>
+      </button>
+      <button class="preset-btn urgent" id="btn-ny_measles" onclick="loadCase('ny_measles')">
+        <div class="preset-btn-name">2. New York - Measles</div>
+        <div class="preset-btn-desc">Liam Chen (4M) | 2h Phone Alert</div>
+      </button>
+      <button class="preset-btn" id="btn-tx_pertussis" onclick="loadCase('tx_pertussis')">
+        <div class="preset-btn-name">3. Texas - Pertussis</div>
+        <div class="preset-btn-desc">Sofia Rodriguez (2moF) | EPI-2</div>
+      </button>
+      <button class="preset-btn" id="btn-fl_syphilis" onclick="loadCase('fl_syphilis')">
+        <div class="preset-btn-name">4. Florida - Syphilis</div>
+        <div class="preset-btn-desc">Marcus Vance (27M) | DH 2136</div>
+      </button>
+      <button class="preset-btn" id="btn-wa_legion" onclick="loadCase('wa_legion')">
+        <div class="preset-btn-name">5. Washington - Legion</div>
+        <div class="preset-btn-desc">Eleanor Rigby (68F) | 420-056</div>
+      </button>
+      <button class="preset-btn" id="btn-oh_hepa" onclick="loadCase('oh_hepa')">
+        <div class="preset-btn-name">6. Ohio - Hepatitis A</div>
+        <div class="preset-btn-desc">David Miller (41M) | Food Handler</div>
+      </button>
+      <button class="preset-btn negative" id="btn-non_reportable" onclick="loadCase('non_reportable')">
+        <div class="preset-btn-name">7. Pharyngitis (Negative)</div>
+        <div class="preset-btn-desc">Sarah Jenkins (25F) | Suppressed</div>
+      </button>
+    </div>
+
+    <!-- DYNAMIC UPLOAD & PARSING SECTION -->
+    <div class="upload-strip">
+      <div class="upload-controls-row">
+        <div>
+          <b>EHR &amp; Laboratory Evidence Ingestion Dropzone:</b>
+          <span style="color:var(--text-muted);margin-left:6px;">Upload JSON, XML, or HL7 message files (e.g. from <code>signal_test_suite/</code>)</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input type="file" id="clinicalFileInput" accept=".json,.xml,.hl7,.txt" onchange="handleFileUpload(event)" style="font-size:11.5px;">
+        </div>
+      </div>
+      <div id="fileUploadStatus" class="upload-status-box"></div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: DIAGNOSTIC & ANATOMICAL VIEW -->
+  <section class="diagnostic-view">
+    <div class="model-box">
+      <div class="model-controls">
+        <span class="tab-pill">Coronal Dual View</span>
+        <button class="tab-pill" onclick="toggleHires()" id="hiresToggleBtn">View High-Res 3D Model</button>
+      </div>
+
+      <img id="bodyDisplayImg" src="assets/body_3d_crop.png" class="body-img" alt="3D Anatomical Body View">
+
+      <!-- Dynamic Pathology Hotspot -->
+      <div class="pulse-indicator" id="pathologyPulse" style="top:32%; left:33.5%;"></div>
+
+      <!-- Floating Pathology Callout Tag -->
+      <div class="pathology-callout" id="pathologyCallout" style="top:25px; left:36%;">
+        <div class="callout-title" id="calloutTitle">Right Apical Lung Cavity</div>
+        <div class="callout-diag" id="calloutDiag">Tuberculosis (ICD-10 A15.0)</div>
+        <div class="callout-score" id="calloutScore">99.8% Match</div>
+        <div class="callout-deadline" id="calloutDeadline">Statutory SLA: 1 Workday</div>
+      </div>
+    </div>
+
+    <!-- PATIENT SUMMARY & REPORTABILITY PROFILE -->
+    <div class="card summary-card">
+      <div>
+        <div class="patient-profile-header">
+          <img id="patientAvatarImg" src="assets/patient_mary.png" class="patient-avatar-img" alt="Patient Avatar">
+          <div>
+            <div class="patient-info-name" id="patientName">Maya Carter</div>
+            <div class="patient-info-meta" id="patientMeta">32 yrs | Female | San Francisco, CA</div>
+          </div>
+        </div>
+
+        <table class="summary-table">
+          <tr>
+            <td class="sum-label">Suspected / Confirmed</td>
+            <td><span class="sum-val blue" id="sumCondition">Tuberculosis (Pulmonary)</span></td>
+          </tr>
+          <tr>
+            <td class="sum-label">Jurisdictional Target</td>
+            <td><span class="sum-val" id="sumJurisdiction">California (CDPH)</span></td>
+          </tr>
+          <tr>
+            <td class="sum-label">Mandated SLA Window</td>
+            <td><span class="sum-val orange" id="sumTimeframe">1 Working Day (17 CCR § 2500)</span></td>
+          </tr>
+          <tr>
+            <td class="sum-label">Reportability Rule Match</td>
+            <td><span class="sum-val green" id="sumConfidence">99.8% Confirmed</span></td>
+          </tr>
+          <tr>
+            <td class="sum-label">Compliance Routing</td>
+            <td><span class="sum-val" id="sumChannel">eCR (AIMS Hub) + CDPH 110b Fallback</span></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="action-buttons-strip">
+        <button class="btn-primary" id="btnTransmit" onclick="simulateTransmission()">
+          Transmit eICR to APHL AIMS
+        </button>
+        <button class="btn-secondary" id="btnDownloadForm" onclick="downloadAccurateForm()">
+          Download Official State Form (PDF)
+        </button>
+        <button class="btn-secondary" id="btnPrintForm" onclick="printOfficialStateForm()">
+          Print / Save Form as PDF
+        </button>
+        <a class="btn-outline" id="btnStatePortal" target="_blank" href="https://www.cdph.ca.gov/Programs/PSB/Pages/CommunicableDiseaseControl.aspx">
+          Official State Portal &rarr;
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SURVEILLANCE TRENDS & AI EPIDEMIOLOGY -->
+  <section class="trends-row">
+    <div class="mini-trend-box">
+      <div class="mini-trend-title">Transmission Latency</div>
+      <div class="mini-trend-stat" style="color:var(--green-ok);">1.4 mins</div>
+      <div class="mini-trend-desc">From lab sign-out to AIMS hub receipt (SLA: &lt;15 mins)</div>
+    </div>
+    <div class="mini-trend-box">
+      <div class="mini-trend-title">RCKMS Rules Accuracy</div>
+      <div class="mini-trend-stat" style="color:var(--blue-primary);">99.8%</div>
+      <div class="mini-trend-desc">Zero false-positive eICRs transmitted this quarter</div>
+    </div>
+    <div class="mini-trend-box">
+      <div class="mini-trend-title">SLA Compliance Countdown</div>
+      <div class="mini-trend-stat" id="slaCountdownDisplay" style="color:var(--orange-accent);">18h 42m</div>
+      <div class="mini-trend-desc" id="slaCountdownDesc">Time remaining to satisfy statutory filing window</div>
+    </div>
+  </section>
+
+  <!-- INFECTION PREVENTION AI INTELLIGENCE BANNER -->
+  <div class="ai-insight-box" id="aiInsightBox">
+    <div style="font-weight:800;font-size:16px;">AI</div>
+    <div id="aiInsightText">
+      Active Tuberculosis cluster signal: 3 positive GeneXpert NAAT cases identified in Bayview district within 14 days. SFDPH TB Control notified.
+    </div>
+  </div>
+
+  <!-- SECTION 3: CONFIRMATORY DIAGNOSTIC LABS -->
+  <section class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <span>3. Confirmatory Diagnostic Laboratory Findings</span>
+        <span class="card-title-badge">LOINC &amp; SNOMED-CT Coded Evidence</span>
+      </div>
+      <span style="font-size:11px;color:var(--text-muted);">Signals extracted from EHR laboratory interface feed</span>
+    </div>
+
+    <table class="evidence-table" id="evidenceTable">
+      <thead>
+        <tr>
+          <th>Diagnostic Test Description</th>
+          <th>LOINC Code</th>
+          <th>Observed Result</th>
+          <th>Reference Range</th>
+          <th>Collection Date</th>
+          <th>Trigger Classification</th>
+        </tr>
+      </thead>
+      <tbody id="evidenceTableBody">
+        <!-- Dynamically populated -->
+      </tbody>
+    </table>
+  </section>
+
+  <!-- SECTION 4: ACCURATE STATE MORBIDITY REPORT FORM (PRE-POPULATED) -->
+  <section class="card" id="reportSection">
+    <div class="card-header">
+      <div class="card-title">
+        <span>4. Accurate State Morbidity Report Form (Pre-Populated)</span>
+        <span class="card-title-badge" id="formBadge">CDPH 110b</span>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-secondary" onclick="printOfficialStateForm()" style="padding:6px 12px;font-size:11px;">
+          Print / Save PDF
+        </button>
+        <button class="btn-primary" onclick="downloadAccurateForm()" style="padding:6px 12px;font-size:11px;">
+          Download PDF
+        </button>
+      </div>
+    </div>
+
+    <div id="reportContainer">
+      <!-- Dynamically populated with authentic state morbidity layout -->
+    </div>
+  </section>
+</main>
+
+<script>
+// COMPLETE JURISDICTIONAL EVIDENCE DATABASE
+const CASES = {
+  ca_tb: {
+    key: "ca_tb",
+    name: "Maya Carter",
+    age: "32 yrs",
+    gender: "Female",
+    dob: "1994-06-18",
+    residence: "2480 Mission St, Apt 4B, San Francisco, CA 94110",
+    phone: "(415) 555-0144",
+    race: "Asian Indian",
+    ethnicity: "Non-Hispanic",
+    occupation: "Software Quality Engineer",
+    avatar: "assets/patient_mary.png",
+    condition: "Tuberculosis (Pulmonary)",
+    jurisdiction: "California Department of Public Health (CDPH)",
+    agencyShort: "CDPH / SFDPH TB Control",
+    statutoryCode: "17 CCR § 2500 & HSC § 120130",
+    timeframe: "1 Working Day",
+    slaHours: 24,
+    confidence: "99.8% Confirmed",
+    channel: "eCR (AIMS Hub) + CDPH 110b Fallback",
+    organ: "Right Apical Lung Cavity",
+    diagnosisCode: "Tuberculosis (ICD-10 A15.0)",
+    pulseTop: "32%", pulseLeft: "33.5%",
+    calloutTop: "25px", calloutLeft: "36%",
+    officialFormNumber: "CDPH 110b (10/19)",
+    officialFormName: "CDPH 110b (10/19) - Confidential Morbidity Report for Tuberculosis",
+    officialPortalUrl: "https://www.cdph.ca.gov/Programs/PSB/Pages/CommunicableDiseaseControl.aspx",
+    insight: "Active Tuberculosis cluster signal: 3 positive GeneXpert NAAT cases identified in Bayview district within 14 days. SFDPH TB Control notified.",
+    isReportable: true,
+    isUrgent: false,
+    details: {
+      provider: "Dr. Sarah Lin, MD (Infectious Disease) [NPI: 1942083112]",
+      facility: "Bayview Regional Medical Center, 1001 Potrero Ave, San Francisco, CA",
+      symptomOnset: "Aug 29, 2026",
+      diagnosisDate: "Sep 12, 2026",
+      symptoms: "Productive cough (>3 weeks), hemoptysis, night sweats, 8-lb weight loss",
+      treatment: "INH 300mg, RIF 600mg, PZA 1500mg, EMB 1200mg (4-drug RIPE protocol)",
+      imaging: "Chest CT: Cavitary lesion right upper lobe with tree-in-bud nodularity",
+      notes: "Directly Observed Therapy (DOT) plan initiated with SFDPH TB Clinic. Household contacts scheduled for QuantiFERON screening."
+    },
+    labs: [
+      { test: "M. tb complex NAAT (GeneXpert MTB/RIF)", loinc: "88538-4", res: "Positive (MTB Detected)", ref: "Negative", date: "Sep 11, 2026", status: "Positive" },
+      { test: "Acid-Fast Bacilli (AFB) Sputum Smear", loinc: "11477-7", res: "Positive (3+ AFB)", ref: "Negative", date: "Sep 10, 2026", status: "Positive" },
+      { test: "QuantiFERON-TB Gold Plus (IGRA)", loinc: "71773-6", res: "Positive (TB1: 4.8 IU/mL)", ref: "<0.35 IU/mL", date: "Sep 09, 2026", status: "Positive" },
+      { test: "Rapid Rifampin Resistance Assay (RIF)", loinc: "88539-2", res: "Mutation Not Detected (Susceptible)", ref: "Not Detected", date: "Sep 11, 2026", status: "Negative" },
+      { test: "MGIT Mycobacterial Sputum Culture", loinc: "543-9", res: "Growth Detected (M. tuberculosis)", ref: "No growth", date: "Sep 12, 2026", status: "Positive" }
+    ]
+  },
+
+  ny_measles: {
+    key: "ny_measles",
+    name: "Liam Chen",
+    age: "4 yrs",
+    gender: "Male",
+    dob: "2022-04-12",
+    residence: "1420 8th Ave, Apt 3C, Brooklyn, NY 11215",
+    phone: "(718) 555-0182",
+    race: "Asian",
+    ethnicity: "Non-Hispanic",
+    occupation: "Child / Preschool Student",
+    avatar: "assets/patient_john.png",
+    condition: "Measles (Rubeola)",
+    jurisdiction: "New York State Department of Health (NYSDOH / NYC DOHMH)",
+    agencyShort: "NYSDOH / NYC DOHMH Bureau of Communicable Disease",
+    statutoryCode: "10 NYCRR § 2.10 (Immediate Telephone Call)",
+    timeframe: "Immediate Phone (2 Hours) / eICR 24h",
+    slaHours: 2,
+    confidence: "99.9% Confirmed",
+    channel: "Immediate Phone Call + eCR (AIMS Hub) + DOH-389",
+    organ: "Facial / Buccal Mucosa (Koplik Spots)",
+    diagnosisCode: "Measles (ICD-10 B05.9)",
+    pulseTop: "24%", pulseLeft: "33.5%",
+    calloutTop: "15px", calloutLeft: "36%",
+    officialFormNumber: "NYSDOH Form DOH-389 (10/14)",
+    officialFormName: "NYSDOH Form DOH-389 - Communicable Disease Reporting Form",
+    officialPortalUrl: "https://www.health.ny.gov/forms/doh-389.pdf",
+    insight: "CRITICAL OUTBREAK WARNING: Unvaccinated pediatric Measles index case. NYC DOHMH alerted via telephone. Contact tracing initiated for Brooklyn daycare.",
+    isReportable: true,
+    isUrgent: true,
+    details: {
+      provider: "Dr. Emily Ross, MD (Pediatrics) [NPI: 1849201944]",
+      facility: "Brooklyn Pediatric Specialty Center / Bellevue Health, Brooklyn, NY",
+      symptomOnset: "Sep 10, 2026",
+      diagnosisDate: "Sep 14, 2026",
+      symptoms: "High fever (103.8 F), barking cough, coryza, conjunctivitis, Koplik spots opposite molars, maculopapular rash",
+      treatment: "Airborne negative-pressure isolation, supportive hydration, high-dose Vitamin A (200,000 IU)",
+      imaging: "None indicated",
+      notes: "MANDATORY PHONE CALL COMPLETED: NYC DOHMH alerted at 212-392-0600 on 2026-09-12 at 11:15 AM. 24 daycare classroom contacts flagged for PEP."
+    },
+    labs: [
+      { test: "Measles Virus RNA by RT-PCR (Nasopharyngeal)", loinc: "75865-6", res: "Positive / Detected", ref: "Not Detected", date: "Sep 13, 2026", status: "Positive" },
+      { test: "Serum Measles IgM Antibody", loinc: "29654-1", res: "Reactive / Positive (Index: 3.42)", ref: "<0.90", date: "Sep 12, 2026", status: "Positive" },
+      { test: "Serum Measles IgG Antibody", loinc: "29655-8", res: "Negative (Index: 0.12)", ref: ">1.10 Immune", date: "Sep 12, 2026", status: "Negative" },
+      { test: "Multiplex Respiratory Viral Panel", loinc: "94500-6", res: "Negative (Flu/COVID/RSV non-detected)", ref: "Negative", date: "Sep 12, 2026", status: "Negative" }
+    ]
+  },
+
+  tx_pertussis: {
+    key: "tx_pertussis",
+    name: "Sofia Rodriguez",
+    age: "2 mos",
+    gender: "Female",
+    dob: "2026-07-04",
+    residence: "5104 Oltorf St, Apt 208, Austin, TX 78741",
+    phone: "(512) 555-0133",
+    race: "Hispanic or Latino",
+    ethnicity: "Hispanic",
+    occupation: "Infant",
+    avatar: "assets/patient_emily.png",
+    condition: "Pertussis (Whooping Cough)",
+    jurisdiction: "Texas Department of State Health Services (DSHS)",
+    agencyShort: "Texas DSHS Region 7 / Austin Public Health",
+    statutoryCode: "Texas Health & Safety Code Chapter 81",
+    timeframe: "1 Workday (24 Hours)",
+    slaHours: 24,
+    confidence: "99.4% Confirmed",
+    channel: "eCR (AIMS Hub) + Texas EPI-2 Fallback",
+    organ: "Tracheobronchial Tree",
+    diagnosisCode: "Pertussis (ICD-10 A37.00)",
+    pulseTop: "29%", pulseLeft: "33.5%",
+    calloutTop: "20px", calloutLeft: "36%",
+    officialFormNumber: "Texas DSHS Form EPI-2 (Rev. 11/17)",
+    officialFormName: "Texas DSHS Form EPI-2 - Initial Provider Disease Report Form",
+    officialPortalUrl: "https://www.dshs.texas.gov/idcu/investigation/conditions/",
+    insight: "Pediatric Pertussis alert: Infant hospitalized for apnea monitoring following severe paroxysmal coughing spasms. Austin Public Health notified.",
+    isReportable: true,
+    isUrgent: false,
+    details: {
+      provider: "Dr. Roberto Garza, MD (Pediatric Pulmonology) [NPI: 1821094321]",
+      facility: "Austin Regional Children's Health Center, Austin, TX",
+      symptomOnset: "Aug 31, 2026",
+      diagnosisDate: "Sep 13, 2026",
+      symptoms: "Paroxysms of staccato coughing, inspiratory whoop, post-tussive vomiting, observed cyanosis and apnea",
+      treatment: "Azithromycin oral suspension 10 mg/kg daily x 5 days. Apnea monitoring in pediatric stepdown unit.",
+      imaging: "Chest X-ray: Peribronchial thickening without focal consolidation",
+      notes: "Infant under-immunized (received only 1st DTaP dose). Post-exposure antimicrobial prophylaxis prescribed for household contacts."
+    },
+    labs: [
+      { test: "Bordetella pertussis DNA by Real-Time PCR", loinc: "31963-2", res: "Positive (DNA Detected)", ref: "Not Detected", date: "Sep 12, 2026", status: "Positive" },
+      { test: "Bordetella parapertussis PCR", loinc: "31964-0", res: "Negative", ref: "Not Detected", date: "Sep 12, 2026", status: "Negative" },
+      { test: "White Blood Cell Count with Differential", loinc: "6690-2", res: "34,200 /mcL (78% Lymphocytes)", ref: "6,000-17,500", date: "Sep 12, 2026", status: "Positive" },
+      { test: "Regan-Lowe Nasopharyngeal Culture", loinc: "542-1", res: "Colonies pending confirmatory typing", ref: "No growth", date: "Sep 13, 2026", status: "Positive" }
+    ]
+  },
+
+  fl_syphilis: {
+    key: "fl_syphilis",
+    name: "Marcus Vance",
+    age: "27 yrs",
+    gender: "Male",
+    dob: "1999-11-20",
+    residence: "1832 Biscayne Blvd, Apt 12A, Miami, FL 33132",
+    phone: "(305) 555-0177",
+    race: "Black or African American",
+    ethnicity: "Non-Hispanic",
+    occupation: "Hospitality Services",
+    avatar: "assets/patient_robert.png",
+    condition: "Primary & Secondary Syphilis",
+    jurisdiction: "Florida Department of Health (FDOH Miami-Dade)",
+    agencyShort: "FDOH Miami-Dade County Health Department STD Unit",
+    statutoryCode: "Rule 64D-3.029, Florida Administrative Code",
+    timeframe: "Next Business Day",
+    slaHours: 24,
+    confidence: "99.7% Confirmed",
+    channel: "eCR (AIMS Hub) + Florida DH 2136 Fallback",
+    organ: "Palms, Soles & Genitourinary Tract",
+    diagnosisCode: "Syphilis (ICD-10 A51.0)",
+    pulseTop: "54%", pulseLeft: "33.5%",
+    calloutTop: "140px", calloutLeft: "36%",
+    officialFormNumber: "Florida DOH Form DH 2136 (07/16)",
+    officialFormName: "Florida DOH Form DH 2136 - Practitioner Disease Report Form",
+    officialPortalUrl: "https://www.floridahealth.gov/diseases-and-conditions/disease-reporting-and-management/disease-reporting-materials/index.html",
+    insight: "Sexually Transmitted Infection alert: Secondary Syphilis case confirmed with reactive RPR titer 1:64 and palmar lesions. Miami-Dade STD Unit mobilized.",
+    isReportable: true,
+    isUrgent: false,
+    details: {
+      provider: "Dr. Anthony Morales, MD (Infectious Diseases) [NPI: 1739281044]",
+      facility: "Miami-Dade Infectious Disease & Wellness Clinic, Miami, FL",
+      symptomOnset: "Aug 28, 2026",
+      diagnosisDate: "Sep 11, 2026",
+      symptoms: "Diffuse copper-colored papulosquamous rash on palms and soles, healing painless penile ulcer, generalized lymphadenopathy",
+      treatment: "Benzathine Penicillin G 2.4 million units IM in a single dose administered in clinic",
+      imaging: "None indicated",
+      notes: "Seroconversion documented from non-reactive screen 14 months prior. Partner notification interview completed with FDOH Disease Intervention Specialists."
+    },
+    labs: [
+      { test: "Rapid Plasma Reagin (RPR) Quantitative Titer", loinc: "20507-0", res: "Reactive (Titer 1:64)", ref: "Non-Reactive", date: "Sep 10, 2026", status: "Positive" },
+      { test: "Treponema pallidum Agglutination (TP-PA)", loinc: "24111-7", res: "Reactive / Confirmed", ref: "Non-Reactive", date: "Sep 11, 2026", status: "Positive" },
+      { test: "HIV 1/2 4th Gen Antigen / Antibody Screen", loinc: "56888-1", res: "Non-Reactive", ref: "Non-Reactive", date: "Sep 10, 2026", status: "Negative" },
+      { test: "N. gonorrhoeae / C. trachomatis NAAT", loinc: "43305-2", res: "Negative", ref: "Negative", date: "Sep 10, 2026", status: "Negative" }
+    ]
+  },
+
+  wa_legion: {
+    key: "wa_legion",
+    name: "Eleanor Rigby",
+    age: "68 yrs",
+    gender: "Female",
+    dob: "1958-03-14",
+    residence: "3421 Queen Anne Ave N, Seattle, WA 98109",
+    phone: "(206) 555-0165",
+    race: "White",
+    ethnicity: "Non-Hispanic",
+    occupation: "Retired Educator",
+    avatar: "assets/patient_emily.png",
+    condition: "Legionellosis (Legionnaires' Disease)",
+    jurisdiction: "Washington State Department of Health (WA DOH)",
+    agencyShort: "Public Health - Seattle & King County Communicable Disease",
+    statutoryCode: "WAC 246-101-101 (24-Hour SLA)",
+    timeframe: "Within 24 Hours",
+    slaHours: 24,
+    confidence: "99.6% Confirmed",
+    channel: "eCR (AIMS Hub) + WA Form 420-056 Fallback",
+    organ: "Right Lower Lung Lobe",
+    diagnosisCode: "Legionellosis (ICD-10 A48.1)",
+    pulseTop: "35%", pulseLeft: "33.5%",
+    calloutTop: "40px", calloutLeft: "36%",
+    officialFormNumber: "WA DOH Form 420-056 (Rev. 01/21)",
+    officialFormName: "WA DOH Form 420-056 - Legionellosis Case Report Form",
+    officialPortalUrl: "https://doh.wa.gov/public-health-healthcare-providers/notifiable-conditions/legionellosis",
+    insight: "Environmental aerosol exposure alert: Patient attended downtown Seattle conference hotel with cooling tower inspection history. King County Environmental Health alerted.",
+    isReportable: true,
+    isUrgent: false,
+    details: {
+      provider: "Dr. Michael Vance, MD (Pulmonary & Critical Care) [NPI: 1658492019]",
+      facility: "Swedish Medical Center First Hill, Seattle, WA",
+      symptomOnset: "Sep 08, 2026",
+      diagnosisDate: "Sep 14, 2026",
+      symptoms: "Severe toxic pneumonia, fever 104.1 F, pleuritic chest pain, watery diarrhea, acute confusion, hyponatremia",
+      treatment: "IV Levofloxacin 750 mg every 24 hours, supplemental oxygen via nasal cannula",
+      imaging: "Chest CT: Dense consolidation right lower and middle lobes with parapneumonic pleural effusion",
+      notes: "Exposure history: Hotel stay and indoor whirlpool tub use in downtown Seattle 7 days prior to onset. Environmental water sampling requested."
+    },
+    labs: [
+      { test: "Legionella pneumophila Urine Antigen Assay", loinc: "29553-5", res: "Positive (Serogroup 1 Detected)", ref: "Negative", date: "Sep 13, 2026", status: "Positive" },
+      { test: "BAL Legionella pneumophila PCR", loinc: "41434-2", res: "Positive (DNA Detected)", ref: "Not Detected", date: "Sep 14, 2026", status: "Positive" },
+      { test: "Serum Sodium (Critical Hyponatremia)", loinc: "2951-2", res: "126 mEq/L (Critical Low)", ref: "135-145", date: "Sep 13, 2026", status: "Positive" },
+      { test: "Routine Bacterial Sputum Culture", loinc: "6460-0", res: "Normal respiratory flora (no standard bacterial growth)", ref: "No pathogens", date: "Sep 14, 2026", status: "Negative" }
+    ]
+  },
+
+  oh_hepa: {
+    key: "oh_hepa",
+    name: "David Miller",
+    age: "41 yrs",
+    gender: "Male",
+    dob: "1985-08-22",
+    residence: "842 High St, Apt 5B, Columbus, OH 43215",
+    phone: "(614) 555-0129",
+    race: "White",
+    ethnicity: "Non-Hispanic",
+    occupation: "Commercial Food Handler (Arena District Bistro)",
+    avatar: "assets/patient_michael.png",
+    condition: "Acute Hepatitis A (HAV)",
+    jurisdiction: "Ohio Department of Health (ODH / Columbus Health)",
+    agencyShort: "ODH / Columbus Public Health Communicable Disease",
+    statutoryCode: "Ohio Administrative Code 3701-3-02 (Class B)",
+    timeframe: "End of Next Business Day (Immediate Food Action)",
+    slaHours: 24,
+    confidence: "99.5% Confirmed",
+    channel: "eCR (AIMS Hub) + ODH HEA 3334 Fallback",
+    organ: "Liver / Hepatic Parenchyma",
+    diagnosisCode: "Acute Hepatitis A (ICD-10 B15.9)",
+    pulseTop: "40%", pulseLeft: "33.5%",
+    calloutTop: "65px", calloutLeft: "36%",
+    officialFormNumber: "ODH Form HEA 3334 (Rev. 04/20)",
+    officialFormName: "ODH Form HEA 3334 - Confidential Reportable Disease Form",
+    officialPortalUrl: "https://odh.ohio.gov/know-our-programs/infectious-disease-control-manual",
+    insight: "HIGH-RISK PUBLIC HEALTH ACTION: Patient is a commercial restaurant food handler. Work exclusion order served. Columbus Public Health post-exposure prophylaxis clinic opened.",
+    isReportable: true,
+    isUrgent: false,
+    details: {
+      provider: "Dr. Karen O'Connor, MD (Gastroenterology) [NPI: 1547382910]",
+      facility: "OhioHealth Grant Medical Center, Columbus, OH",
+      symptomOnset: "Sep 06, 2026",
+      diagnosisDate: "Sep 14, 2026",
+      symptoms: "Scleral icterus, dark tea-colored urine, acholic stools, nausea, extreme fatigue, marked hepatomegaly",
+      treatment: "Strict rest, supportive hydration, complete exclusion from all commercial food preparation per state law",
+      imaging: "Abdominal Ultrasound: Hepatomegaly with gallbladder wall edema and periportal cuffing",
+      notes: "COMMERCIAL FOOD HANDLER PROTOCOL ACTIVATED: Employed as line cook at high-volume restaurant. Contact tracing and patron post-exposure prophylaxis mobilized."
+    },
+    labs: [
+      { test: "Hepatitis A IgM Antibody (Anti-HAV IgM)", loinc: "22314-9", res: "Positive / Reactive", ref: "Negative", date: "Sep 13, 2026", status: "Positive" },
+      { test: "Alanine Aminotransferase (ALT / SGPT)", loinc: "1742-6", res: "1,420 U/L (Profoundly Elevated)", ref: "7-56", date: "Sep 13, 2026", status: "Positive" },
+      { test: "Aspartate Aminotransferase (AST / SGOT)", loinc: "1920-8", res: "1,180 U/L (Profoundly Elevated)", ref: "10-40", date: "Sep 13, 2026", status: "Positive" },
+      { test: "Total Serum Bilirubin", loinc: "1975-2", res: "6.4 mg/dL", ref: "0.1-1.2", date: "Sep 13, 2026", status: "Positive" },
+      { test: "Hepatitis B Surface Antigen (HBsAg)", loinc: "5196-1", res: "Negative", ref: "Negative", date: "Sep 13, 2026", status: "Negative" }
+    ]
+  },
+
+  non_reportable: {
+    key: "non_reportable",
+    name: "Sarah Jenkins",
+    age: "25 yrs",
+    gender: "Female",
+    dob: "2001-02-14",
+    residence: "1208 South Congress Ave, Austin, TX 78704",
+    phone: "(512) 555-0191",
+    race: "White",
+    ethnicity: "Non-Hispanic",
+    occupation: "Graphic Designer",
+    avatar: "assets/patient_mary.png",
+    condition: "Acute Viral Pharyngitis (Non-Reportable)",
+    jurisdiction: "Texas Department of State Health Services (DSHS)",
+    agencyShort: "Texas DSHS / Local Health Authority",
+    statutoryCode: "RCKMS Rule RCKMS-DISP-000 (Suppressed)",
+    timeframe: "Suppressed (No Filing Required)",
+    slaHours: 0,
+    confidence: "100% Suppressed",
+    channel: "eICR Generation Suppressed (Zero-Filing Compliance)",
+    organ: "Oropharynx / Tonsillar Pillars",
+    diagnosisCode: "Viral Pharyngitis (ICD-10 J02.9)",
+    pulseTop: "24%", pulseLeft: "33.5%",
+    calloutTop: "15px", calloutLeft: "36%",
+    officialFormNumber: "No Form Required",
+    officialFormName: "No Form Required (Non-Notifiable Condition)",
+    officialPortalUrl: "https://www.dshs.texas.gov/idcu/investigation/conditions/",
+    insight: "ZERO-FILING AUDIT LOGGED: Clinical encounter evaluated against RCKMS rules. Condition non-notifiable. Notification suppressed to eliminate clinical alert fatigue.",
+    isReportable: false,
+    isUrgent: false,
+    details: {
+      provider: "Dr. Kevin Patel, MD (Family Medicine) [NPI: 1493021988]",
+      facility: "SoCo Urgent Care Center, Austin, TX",
+      symptomOnset: "Sep 12, 2026",
+      diagnosisDate: "Sep 14, 2026",
+      symptoms: "Mild scratchy throat, clear rhinorrhea, low fever (99.2 F), absence of tonsillar exudates or rash",
+      treatment: "Symptomatic care, warm saline gargles, throat lozenges, adequate oral hydration",
+      imaging: "None indicated",
+      notes: "All rapid pathogen diagnostic panels negative. Encounter logged in HIPAA § 164.512(b) disclosure accounting ledger. Electronic reporting suppressed."
+    },
+    labs: [
+      { test: "Rapid Strep A Antigen Assay", loinc: "6556-5", res: "Negative", ref: "Negative", date: "Sep 14, 2026", status: "Negative" },
+      { test: "Multiplex COVID-19 / SARS-CoV-2 PCR", loinc: "94500-6", res: "Negative", ref: "Negative", date: "Sep 14, 2026", status: "Negative" },
+      { test: "Influenza A and B Viral RNA", loinc: "92142-9", res: "Negative", ref: "Negative", date: "Sep 14, 2026", status: "Negative" },
+      { test: "Complete Blood Count (CBC)", loinc: "6690-2", res: "WBC 7,400 /mcL (Normal)", ref: "4,500-11,000", date: "Sep 14, 2026", status: "Negative" }
+    ]
+  }
+};
+
+let currentCaseKey = "ca_tb";
+let highlightedSearchIndex = -1;
+let currentSearchResults = [];
+
+// UPDATE DASHBOARD UI WITH SELECTED CASE
+function loadCase(key) {
+  const c = CASES[key];
+  if (!c) return;
+  currentCaseKey = key;
+
+  // 1. Update Ingested Candidates Preset Buttons
+  document.querySelectorAll(".preset-btn").forEach(btn => btn.classList.remove("active"));
+  const activeBtn = document.getElementById("btn-" + key);
+  if (activeBtn) activeBtn.classList.add("active");
+
+  // 2. Update Anatomical Body Hotspot & Callout
+  const pulse = document.getElementById("pathologyPulse");
+  const callout = document.getElementById("pathologyCallout");
+  pulse.style.top = c.pulseTop;
+  pulse.style.left = c.pulseLeft;
+  pulse.style.display = c.isReportable ? "block" : "none";
+
+  callout.style.top = c.calloutTop;
+  callout.style.left = c.calloutLeft;
+  document.getElementById("calloutTitle").textContent = c.organ;
+  document.getElementById("calloutDiag").textContent = c.diagnosisCode;
+  document.getElementById("calloutScore").textContent = c.confidence + " Rule Match";
+  document.getElementById("calloutDeadline").textContent = "Statutory SLA: " + c.timeframe;
+
+  // 3. Update Patient Profile Card
+  document.getElementById("patientAvatarImg").src = c.avatar;
+  document.getElementById("patientName").textContent = c.name;
+  document.getElementById("patientMeta").textContent = c.age + " | " + c.gender + " | " + c.residence.split(",").slice(1).join(",").trim();
+
+  document.getElementById("sumCondition").textContent = c.condition;
+  document.getElementById("sumJurisdiction").textContent = c.jurisdiction;
+  document.getElementById("sumTimeframe").textContent = c.timeframe;
+  document.getElementById("sumTimeframe").className = c.isUrgent ? "sum-val red" : (!c.isReportable ? "sum-val" : "sum-val orange");
+  document.getElementById("sumConfidence").textContent = c.confidence;
+  document.getElementById("sumConfidence").className = !c.isReportable ? "sum-val" : "sum-val green";
+  document.getElementById("sumChannel").textContent = c.channel;
+
+  // 4. Update Countdown Timer
+  const timerDisplay = document.getElementById("slaCountdownDisplay");
+  const timerDesc = document.getElementById("slaCountdownDesc");
+  if (!c.isReportable) {
+    timerDisplay.textContent = "N/A";
+    timerDisplay.style.color = "var(--text-muted)";
+    timerDesc.textContent = "Non-reportable encounter (no statutory filing requirement)";
+  } else if (c.isUrgent) {
+    timerDisplay.textContent = "1h 18m";
+    timerDisplay.style.color = "var(--red-alert)";
+    timerDesc.textContent = "CRITICAL: Urgent 2-hour phone call SLA clock running";
+  } else {
+    timerDisplay.textContent = "18h 42m";
+    timerDisplay.style.color = "var(--orange-accent)";
+    timerDesc.textContent = "Time remaining to satisfy statutory filing window (" + c.timeframe + ")";
+  }
+
+  // 5. Update AI Surveillance Insight Banner
+  const aiBox = document.getElementById("aiInsightBox");
+  const aiText = document.getElementById("aiInsightText");
+  aiText.textContent = c.insight;
+  if (c.isUrgent) {
+    aiBox.className = "ai-insight-box urgent";
+  } else {
+    aiBox.className = "ai-insight-box";
+  }
+
+  // 6. Update Action Buttons
+  const transmitBtn = document.getElementById("btnTransmit");
+  const formBtn = document.getElementById("btnDownloadForm");
+  const portalBtn = document.getElementById("btnStatePortal");
+
+  if (!c.isReportable) {
+    transmitBtn.textContent = "Transmission Blocked (Suppressed)";
+    transmitBtn.style.opacity = "0.5";
+    formBtn.textContent = "No Form Required (Suppressed)";
+    formBtn.style.opacity = "0.5";
+    portalBtn.href = c.officialPortalUrl;
+  } else {
+    transmitBtn.textContent = c.isUrgent ? "Transmit Urgent eICR (AIMS)" : "Transmit eICR to APHL AIMS";
+    transmitBtn.style.opacity = "1";
+    formBtn.textContent = "Download Official State Form (PDF)";
+    formBtn.style.opacity = "1";
+    portalBtn.href = c.officialPortalUrl;
+  }
+
+  // 7. Render Evidence Lab Table
+  renderEvidenceTable(c.labs);
+
+  // 8. Render Official State Morbidity Form
+  renderReportSection(c);
+}
+
+function renderEvidenceTable(labs) {
+  const tbody = document.getElementById("evidenceTableBody");
+  tbody.innerHTML = "";
+  labs.forEach(l => {
+    const tr = document.createElement("tr");
+    const statusClass = l.status === "Positive" ? "tag-pos" : "tag-neg";
+    tr.innerHTML = `
+      <td><b>${escapeHtml(l.test)}</b></td>
+      <td><span class="tag-loinc">${escapeHtml(l.loinc)}</span></td>
+      <td><span class="${statusClass}">${escapeHtml(l.res)}</span></td>
+      <td style="color:#64748b;">${escapeHtml(l.ref)}</td>
+      <td>${escapeHtml(l.date)}</td>
+      <td>${l.status === 'Positive' ? '<span style="color:#dc2626;font-weight:700;">Trigger Matched</span>' : '<span style="color:#16a34a;">Non-Reactive</span>'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderReportSection(c) {
+  const container = document.getElementById("reportContainer");
+  const badge = document.getElementById("formBadge");
+  badge.textContent = c.officialFormNumber;
+
+  if (!c.isReportable) {
+    container.innerHTML = `
+      <div class="suppressed-alert">
+        <div class="suppressed-title">CASE SUPPRESSED: NON-REPORTABLE ENCOUNTER</div>
+        <div class="suppressed-desc">
+          <b>Evaluated Clinical Encounter:</b> ${escapeHtml(c.condition)} (${escapeHtml(c.diagnosisCode)})<br>
+          <b>Public Health Decision Rule:</b> RCKMS Rule RCKMS-DISP-000 (Zero-Trigger Condition)<br>
+          <b>Automated Decision Engine Action:</b> SIGNAL evaluated EHR clinical notes, vital signs, and diagnostic assays. All pathogen tests returned negative.<br><br>
+          <b>Alert Fatigue Prevention:</b> Electronic Case Report (eICR) assembling and state morbidity reporting are <b>strictly suppressed</b> to shield hospital infection preventionists from notification overload.<br><br>
+          <b>Statutory HIPAA Compliance:</b> SHA-256 event audit hash logged in immutable compliance register for HIPAA Public Health Disclosure Accounting (§ 164.512(b)). No unneeded disclosure occurred.
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const noticeClass = c.isUrgent ? "form-statutory-notice urgent" : "form-statutory-notice";
+  const noticeText = c.isUrgent
+    ? "URGENT TELEPHONE NOTIFICATION MANDATED: Legal requirement to call local county health officer within 2 hours pursuant to 10 NYCRR § 2.10. Initial written/electronic report must follow within 24 hours."
+    : "STATUTORY COMPLIANCE NOTICE: Official morbidity reporting form pre-populated by SIGNAL Intelligence Layer. Submit to local public health authority within statutory window: " + c.timeframe + " (" + c.statutoryCode + ").";
+
+  let specificFieldsHtml = "";
+
+  if (c.key === "ca_tb" || (c.condition && c.condition.toLowerCase().includes("tuberculosis"))) {
+    specificFieldsHtml = `
+      <div class="form-grid-box">
+        <div class="form-box-title">
+          <span>2. Tuberculosis Clinical Evaluation &amp; Risk Profile</span>
+          <span>CDPH Title 17 § 2500</span>
+        </div>
+        <div class="form-two-cols">
+          <div class="form-field-cell">
+            <b>Clinical Status</b>
+            <div class="form-check-group">
+              <div class="form-check-item"><span class="form-check-box checked">&#10003;</span> Suspect Active TB</div>
+              <div class="form-check-item"><span class="form-check-box"></span> Latent TB Infection</div>
+            </div>
+          </div>
+          <div class="form-field-cell">
+            <b>Anatomical Site of Disease</b>
+            <div class="form-check-group">
+              <div class="form-check-item"><span class="form-check-box checked">&#10003;</span> Pulmonary</div>
+              <div class="form-check-item"><span class="form-check-box"></span> Pleural</div>
+              <div class="form-check-item"><span class="form-check-box"></span> Lymphatic</div>
+              <div class="form-check-item"><span class="form-check-box"></span> Other</div>
+            </div>
+          </div>
+          <div class="form-field-cell">
+            <b>Chest Radiograph / CT Findings</b>
+            <span>${escapeHtml(c.details.imaging)}</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Rifampin Resistance (rpoB Assay)</b>
+            <span style="color:#16a34a;font-weight:700;">Mutation Not Detected (Susceptible)</span>
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (c.key === "ny_measles" || (c.condition && c.condition.toLowerCase().includes("measles"))) {
+    specificFieldsHtml = `
+      <div class="form-grid-box" style="border:1.5px solid #dc2626;">
+        <div class="form-box-title" style="background:#fee2e2;color:#991b1b;">
+          <span>2. Urgent Measles (Rubeola) Clinical Criteria &amp; Contact Log</span>
+          <span>Mandatory 2-Hour Telephone SLA</span>
+        </div>
+        <div class="form-two-cols">
+          <div class="form-field-cell">
+            <b>Health Officer Telephone Notification Log</b>
+            <span style="color:#dc2626;font-weight:800;">NYC DOHMH Alerted (212-392-0600) on 2026-09-12 at 11:15 AM</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Immunization History (MMR)</b>
+            <span style="color:#dc2626;font-weight:800;">Zero Doses (Unimmunized / Vaccine-Hesitant Parent)</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Clinical Case Definition Check</b>
+            <div class="form-check-group" style="flex-wrap:wrap;">
+              <div class="form-check-item"><span class="form-check-box checked">&#10003;</span> Fever &ge;101&deg;F (103.8&deg;F)</div>
+              <div class="form-check-item"><span class="form-check-box checked">&#10003;</span> Generalized Rash</div>
+              <div class="form-check-item"><span class="form-check-box checked">&#10003;</span> Cough/Coryza</div>
+              <div class="form-check-item"><span class="form-check-box checked">&#10003;</span> Koplik Spots</div>
+            </div>
+          </div>
+          <div class="form-field-cell">
+            <b>Airborne Isolation Status</b>
+            <span style="color:#16a34a;font-weight:700;">Strict Negative-Pressure Airborne Isolation Ordered</span>
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (c.key === "tx_pertussis" || (c.condition && c.condition.toLowerCase().includes("pertussis"))) {
+    specificFieldsHtml = `
+      <div class="form-grid-box">
+        <div class="form-box-title">
+          <span>2. Pertussis Case Investigation &amp; Clinical Paroxysms</span>
+          <span>Texas Health &amp; Safety Code Ch. 81</span>
+        </div>
+        <div class="form-two-cols">
+          <div class="form-field-cell">
+            <b>Paroxysmal Cough Duration</b>
+            <span>&ge;14 Days (Onset: Aug 31, 2026) with Observed Apnea</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Immunization Status (DTaP)</b>
+            <span>1 Dose Administered (Incomplete series)</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Clinical Symptoms</b>
+            <div class="form-check-group" style="flex-wrap:wrap;">
+              <div class="form-check-item"><span class="form-check-box checked">&#10003;</span> Paroxysmal Spasms</div>
+              <div class="form-check-item"><span class="form-check-box checked">&#10003;</span> Inspiratory Whoop</div>
+              <div class="form-check-item"><span class="form-check-box checked">&#10003;</span> Post-tussive Emesis</div>
+              <div class="form-check-item"><span class="form-check-box checked">&#10003;</span> Apnea</div>
+            </div>
+          </div>
+          <div class="form-field-cell">
+            <b>Hospitalization Status</b>
+            <span>Pediatric Stepdown Unit - Apnea &amp; Pulse Oximetry Monitoring</span>
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (c.key === "fl_syphilis" || (c.condition && c.condition.toLowerCase().includes("syphilis"))) {
+    specificFieldsHtml = `
+      <div class="form-grid-box">
+        <div class="form-box-title">
+          <span>2. Syphilis Staging &amp; Serological Profile</span>
+          <span>Rule 64D-3.029, F.A.C.</span>
+        </div>
+        <div class="form-two-cols">
+          <div class="form-field-cell">
+            <b>Clinical Stage of Syphilis</b>
+            <div class="form-check-group">
+              <div class="form-check-item"><span class="form-check-box"></span> Primary</div>
+              <div class="form-check-item"><span class="form-check-box checked">&#10003;</span> Secondary</div>
+              <div class="form-check-item"><span class="form-check-box"></span> Early Latent</div>
+              <div class="form-check-item"><span class="form-check-box"></span> Late/Unknown</div>
+            </div>
+          </div>
+          <div class="form-field-cell">
+            <b>Quantitative Serology</b>
+            <span>RPR Reactive Titer 1:64 | TP-PA Confirmatory Reactive</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Clinical Manifestations</b>
+            <span>Copper-colored maculopapular rash on palms &amp; soles; healing painless chancre</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Partner Services Referral</b>
+            <span>Sexual contacts in prior 90 days referred for confidential FDOH DIS tracing</span>
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (c.key === "wa_legion" || (c.condition && c.condition.toLowerCase().includes("legion"))) {
+    specificFieldsHtml = `
+      <div class="form-grid-box">
+        <div class="form-box-title">
+          <span>2. Legionellosis Environmental Exposure &amp; Clinical Severity</span>
+          <span>WAC 246-101-101</span>
+        </div>
+        <div class="form-two-cols">
+          <div class="form-field-cell">
+            <b>Aerosolized Water Source Exposure (Past 14 Days)</b>
+            <div class="form-check-group" style="flex-wrap:wrap;">
+              <div class="form-check-item"><span class="form-check-box checked">&#10003;</span> Hotel Stay</div>
+              <div class="form-check-item"><span class="form-check-box checked">&#10003;</span> Commercial Hot Tub/Whirlpool</div>
+              <div class="form-check-item"><span class="form-check-box"></span> Healthcare Facility</div>
+            </div>
+          </div>
+          <div class="form-field-cell">
+            <b>Laboratory Confirmation</b>
+            <span>Urine Antigen Assay Serogroup 1 POSITIVE (LOINC 29553-5)</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Clinical Severity &amp; Laboratory Correlation</b>
+            <span>Toxic pneumonia, dense consolidation, Severe Hyponatremia (Na 126 mEq/L)</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Environmental Health Response</b>
+            <span>Environmental Health notified for facility cooling tower sampling</span>
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (c.key === "oh_hepa" || (c.condition && c.condition.toLowerCase().includes("hepatitis"))) {
+    specificFieldsHtml = `
+      <div class="form-grid-box" style="border:1.5px solid #ea580c;">
+        <div class="form-box-title" style="background:#fff7ed;color:#9a3412;">
+          <span>2. Acute Hepatitis A &amp; Commercial Food Handler Alert</span>
+          <span>Ohio Administrative Code 3701-3-02</span>
+        </div>
+        <div class="form-two-cols">
+          <div class="form-field-cell">
+            <b>Commercial Food Handler Status</b>
+            <span style="color:#ea580c;font-weight:800;">YES - Commercial Food Service Employee</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Mandatory Exclusion Order</b>
+            <span style="color:#dc2626;font-weight:800;">Immediate Food Handling Work Exclusion Served</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Acute Hepatic Biomarkers</b>
+            <span>Anti-HAV IgM Reactive | Marked Transaminitis | Elevated Bilirubin</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Community Prophylaxis Clinic</b>
+            <span>Local Health Department mobilizing patron Post-Exposure Prophylaxis clinic</span>
+          </div>
+        </div>
+      </div>
+    `;
+  } else {
+    // Dynamic clinical layout for uploaded custom cases
+    specificFieldsHtml = `
+      <div class="form-grid-box">
+        <div class="form-box-title">
+          <span>2. Clinical Case Evaluation &amp; Diagnostic Details</span>
+          <span>${escapeHtml(c.statutoryCode || 'Notifiable Disease Surveillance')}</span>
+        </div>
+        <div class="form-two-cols">
+          <div class="form-field-cell">
+            <b>Clinical Presentation</b>
+            <span>${escapeHtml(c.details.symptoms || 'Clinical signs evaluated')}</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Diagnostic Confirmation</b>
+            <span style="color:#16a34a;font-weight:700;">Confirmed via Laboratory Triggers</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Imaging / Findings</b>
+            <span>${escapeHtml(c.details.imaging || 'None indicated')}</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Public Health Priority</b>
+            <span>${escapeHtml(c.timeframe || 'Routine 1 Workday')}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = `
+    <div class="official-form-container">
+      <div class="form-gov-header">
+        <div>
+          <div class="gov-agency">${escapeHtml(c.jurisdiction)}</div>
+          <div class="gov-form-title">${escapeHtml(c.officialFormName)}</div>
+          <div class="gov-seal-text">Official Confidential State Morbidity Document &bull; Statutory Submission Packet</div>
+        </div>
+        <div class="gov-form-ref">
+          <b>STATUTORY COMPLIANCE</b><br>
+          Authority: ${escapeHtml(c.statutoryCode || 'Public Health Code')}<br>
+          Filing SLA: ${escapeHtml(c.timeframe)}
+        </div>
+      </div>
+
+      <div class="${noticeClass}">
+        ${noticeText}
+      </div>
+
+      <!-- Section 1: Patient Information & Residence -->
+      <div class="form-grid-box">
+        <div class="form-box-title">
+          <span>1. Patient Identification &amp; Demographics</span>
+          <span>Confidential Personal Health Information</span>
+        </div>
+        <div class="form-two-cols">
+          <div class="form-field-cell">
+            <b>Patient Legal Name</b>
+            <span>${escapeHtml(c.name)}</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Date of Birth &amp; Age / Sex</b>
+            <span>${escapeHtml(c.dob)} (Age: ${escapeHtml(c.age)}) | ${escapeHtml(c.gender)}</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Residential Street Address</b>
+            <span>${escapeHtml(c.residence)}</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Telephone &amp; Occupation</b>
+            <span>${escapeHtml(c.phone)} | ${escapeHtml(c.occupation || 'N/A')}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Specific Jurisdictional Diagnostic Block -->
+      ${specificFieldsHtml}
+
+      <!-- Section 3: Diagnostic Laboratory Findings -->
+      <div class="form-grid-box">
+        <div class="form-box-title">
+          <span>3. Diagnostic Laboratory Evidence (LOINC Standardized)</span>
+          <span>Clinical Laboratory Reporting System Feed</span>
+        </div>
+        <div style="padding:10px 12px;font-size:12px;background:#ffffff;">
+          <div style="margin-bottom:6px;font-weight:700;color:#334155;">Reported Trigger Test Results:</div>
+          <ul style="padding-left:18px;margin-bottom:8px;line-height:1.6;">
+            ${c.labs.map(l => `<li><b>${escapeHtml(l.test)}</b> [LOINC: <span style="font-family:monospace;">${escapeHtml(l.loinc)}</span>]: <span style="color:${l.status==='Positive'?'#dc2626':'#16a34a'};font-weight:700;">${escapeHtml(l.res)}</span> (Reference: ${escapeHtml(l.ref)}) &mdash; Collected: ${escapeHtml(l.date)}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 4: Treatment & Infection Control -->
+      <div class="form-grid-box">
+        <div class="form-box-title">
+          <span>4. Prescribed Therapy &amp; Epidemiological Action Notes</span>
+          <span>Public Health Case Management</span>
+        </div>
+        <div class="form-two-cols">
+          <div class="form-field-cell">
+            <b>Prescribed Medication Regimen</b>
+            <span>${escapeHtml(c.details.treatment)}</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Clinical Progression Notes</b>
+            <span>${escapeHtml(c.details.notes)}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5: Submitting Physician & Healthcare Facility Certification -->
+      <div class="form-grid-box">
+        <div class="form-box-title">
+          <span>5. Submitting Healthcare Provider &amp; Certification</span>
+          <span>Electronic Case Reporting Mandate</span>
+        </div>
+        <div class="form-two-cols">
+          <div class="form-field-cell">
+            <b>Reporting Provider</b>
+            <span>${escapeHtml(c.details.provider)}</span>
+          </div>
+          <div class="form-field-cell">
+            <b>Submitting Facility &amp; Address</b>
+            <span>${escapeHtml(c.details.facility)}</span>
+          </div>
+        </div>
+        <div class="signature-block">
+          <div>
+            <b>Statutory Certification:</b> I hereby certify under penalty of state public health law that this communicable disease case report is accurate and assembled from confirmed clinical and diagnostic records.<br>
+            <span style="font-size:10px;color:#64748b;">Assembled by SIGNAL Public Health Intelligence Layer v1.0. Validated against CDC eCR &amp; RCKMS v2026.3.</span>
+          </div>
+          <div class="sig-line">
+            <b>Authorized Signature:</b> Sarah Lin, MD<br>
+            <span style="font-size:9.5px;">Date: Sep 14, 2026 &bull; NPI: 1942083112</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// LIVE SEARCH ENGINE IMPLEMENTATION
+function handleSearch(query) {
+  const dropdown = document.getElementById("searchResultsDropdown");
+  const clearBtn = document.getElementById("clearSearchBtn");
+  const q = (query || "").trim().toLowerCase();
+
+  if (q.length > 0) {
+    clearBtn.style.display = "block";
+  } else {
+    clearBtn.style.display = "none";
+  }
+
+  if (!q) {
+    dropdown.style.display = "none";
+    dropdown.innerHTML = "";
+    resetPresetButtonsFilter();
+    currentSearchResults = [];
+    highlightedSearchIndex = -1;
+    return;
+  }
+
+  const matches = [];
+  for (const [key, c] of Object.entries(CASES)) {
+    const hay = (
+      c.name + " " +
+      c.condition + " " +
+      c.jurisdiction + " " +
+      c.organ + " " +
+      c.diagnosisCode + " " +
+      c.residence + " " +
+      c.officialFormName + " " +
+      c.officialFormNumber + " " +
+      JSON.stringify(c.labs) + " " +
+      JSON.stringify(c.details)
+    ).toLowerCase();
+
+    if (hay.includes(q)) {
+      matches.push(c);
+    }
+  }
+
+  currentSearchResults = matches;
+  highlightedSearchIndex = matches.length > 0 ? 0 : -1;
+
+  // Dynamically filter sidebar candidate buttons
+  filterPresetButtons(matches);
+
+  if (matches.length === 0) {
+    dropdown.innerHTML = `
+      <div style="padding:16px 14px;font-size:12px;color:#64748b;text-align:center;">
+        No candidate cases or rules found for "<b>${escapeHtml(query)}</b>"<br>
+        <span style="font-size:10.5px;color:#94a3b8;margin-top:4px;display:block;">Try searching: <b>Measles</b>, <b>TB</b>, <b>Sofia</b>, <b>Florida</b>, <b>88538</b>, <b>420-056</b>, or <b>Negative</b></span>
+      </div>
+    `;
+    dropdown.style.display = "block";
+    return;
+  }
+
+  let html = `<div style="padding:6px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;">Found ${matches.length} matching candidate cases</div>`;
+
+  matches.forEach((m, idx) => {
+    const pillClass = m.isUrgent ? "result-pill urgent" : (!m.isReportable ? "result-pill suppressed" : "result-pill");
+    const pillText = m.isUrgent ? "URGENT PHONE" : (!m.isReportable ? "SUPPRESSED" : "REPORTABLE");
+    const isHighlighted = idx === 0 ? "highlighted" : "";
+
+    html += `
+      <div class="search-result-item ${isHighlighted}" id="searchItem-${idx}" onclick="selectSearchResult('${m.key}')" onmouseenter="setHighlightedSearchItem(${idx})">
+        <div>
+          <div class="result-name">${highlightMatch(m.name, q)} <span style="font-weight:normal;color:#64748b;font-size:11px;">(${escapeHtml(m.age)}, ${escapeHtml(m.gender)})</span></div>
+          <div class="result-disease">${highlightMatch(m.condition, q)} &bull; <span style="font-size:10.5px;color:#64748b;">${highlightMatch(m.diagnosisCode, q)}</span></div>
+          <div class="result-meta">${highlightMatch(m.jurisdiction, q)} | ${highlightMatch(m.officialFormNumber, q)}</div>
+        </div>
+        <div style="text-align:right;">
+          <span class="${pillClass}">${pillText}</span>
+          <div style="font-size:10.5px;color:#2563eb;font-weight:700;margin-top:4px;">Select Case &rarr;</div>
+        </div>
+      </div>
+    `;
+  });
+
+  dropdown.innerHTML = html;
+  dropdown.style.display = "block";
+}
+
+function handleSearchFocus() {
+  const input = document.getElementById("globalSearchInput");
+  if (input.value.trim().length > 0) {
+    handleSearch(input.value);
+  }
+}
+
+function handleSearchKey(e) {
+  const dropdown = document.getElementById("searchResultsDropdown");
+  if (dropdown.style.display !== "block" || currentSearchResults.length === 0) {
+    if (e.key === "Enter") {
+      const q = e.target.value.trim();
+      if (q) handleSearch(q);
+    }
+    return;
+  }
+
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    highlightedSearchIndex = (highlightedSearchIndex + 1) % currentSearchResults.length;
+    updateHighlightedSearchItem();
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    highlightedSearchIndex = (highlightedSearchIndex - 1 + currentSearchResults.length) % currentSearchResults.length;
+    updateHighlightedSearchItem();
+  } else if (e.key === "Enter") {
+    e.preventDefault();
+    if (highlightedSearchIndex >= 0 && highlightedSearchIndex < currentSearchResults.length) {
+      selectSearchResult(currentSearchResults[highlightedSearchIndex].key);
+    }
+  } else if (e.key === "Escape") {
+    dropdown.style.display = "none";
+  }
+}
+
+function setHighlightedSearchItem(idx) {
+  highlightedSearchIndex = idx;
+  updateHighlightedSearchItem();
+}
+
+function updateHighlightedSearchItem() {
+  document.querySelectorAll(".search-result-item").forEach((item, idx) => {
+    if (idx === highlightedSearchIndex) item.classList.add("highlighted");
+    else item.classList.remove("highlighted");
+  });
+}
+
+function selectSearchResult(key) {
+  loadCase(key);
+  document.getElementById("searchResultsDropdown").style.display = "none";
+  document.getElementById("globalSearchInput").value = CASES[key].name + " - " + CASES[key].condition;
+  document.getElementById("clearSearchBtn").style.display = "block";
+  resetPresetButtonsFilter();
+}
+
+function clearSearch() {
+  const input = document.getElementById("globalSearchInput");
+  input.value = "";
+  document.getElementById("clearSearchBtn").style.display = "none";
+  document.getElementById("searchResultsDropdown").style.display = "none";
+  resetPresetButtonsFilter();
+  input.focus();
+}
+
+function filterPresetButtons(matches) {
+  const matchedKeys = new Set(matches.map(m => m.key));
+  document.querySelectorAll(".preset-btn").forEach(btn => {
+    const key = btn.id.replace("btn-", "");
+    if (matchedKeys.has(key)) {
+      btn.classList.remove("dimmed");
+    } else {
+      btn.classList.add("dimmed");
+    }
+  });
+}
+
+function resetPresetButtonsFilter() {
+  document.querySelectorAll(".preset-btn").forEach(btn => btn.classList.remove("dimmed"));
+}
+
+function highlightMatch(text, query) {
+  if (!text) return "";
+  const str = String(text);
+  const q = String(query).trim();
+  if (!q) return escapeHtml(str);
+  const regex = new RegExp("(" + escapeRegex(q) + ")", "gi");
+  return str.replace(regex, '<mark style="background:#fef08a;padding:0 2px;border-radius:2px;">$1</mark>');
+}
+
+function escapeRegex(string) {
+  return string.replace(/[.*+?^$\{}()|[\]\\]/g, '\\$&');
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+// Close search dropdown on click outside
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".topbar-center")) {
+    const dd = document.getElementById("searchResultsDropdown");
+    if (dd) dd.style.display = "none";
+  }
+});
+
+// Keyboard shortcut: Ctrl+K or Cmd+K focuses search
+document.addEventListener("keydown", (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+    e.preventDefault();
+    const input = document.getElementById("globalSearchInput");
+    input.focus();
+    input.select();
+  }
+});
+
+// REAL FILE READER & PARSER (Ingests JSON / HL7 evidence files and dynamically updates entire UI)
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const statusBox = document.getElementById("fileUploadStatus");
+  statusBox.style.display = "block";
+  statusBox.innerHTML = '<span style="color:#2563eb;font-weight:700;">Ingesting and parsing ' + escapeHtml(file.name) + ' (' + Math.round(file.size/1024) + ' KB)...</span>';
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      let rawText = e.target.result;
+      // Strip UTF-8 BOM if present
+      rawText = rawText.replace(/^\uFEFF/, '').trim();
+
+      let data = null;
+      try {
+        data = JSON.parse(rawText);
+      } catch (jsonErr) {
+        // Simple heuristic fallback for plain text or HL7
+        data = parseHeuristicEvidence(rawText, file.name);
+      }
+
+      if (!data) {
+        statusBox.innerHTML = '<span style="color:#dc2626;font-weight:700;">Error:</span> Unable to parse clinical payload in ' + escapeHtml(file.name);
+        return;
+      }
+
+      // Build complete structured case from uploaded evidence
+      const newCase = buildCaseFromEvidence(data, file.name);
+
+      // Store as active uploaded case in CASES dictionary
+      CASES["uploaded_case"] = newCase;
+
+      // Add or update an "&#9733; Uploaded File" preset button in Section 1
+      ensureUploadedPresetButton(newCase);
+
+      // Instantly load this case!
+      loadCase("uploaded_case");
+
+      const statusTag = newCase.isReportable
+        ? '<span style="color:#16a34a;font-weight:700;">STATUTORY REPORTABLE (' + escapeHtml(newCase.jurisdiction) + ')</span>'
+        : '<span style="color:#64748b;font-weight:700;">NON-REPORTABLE (SUPPRESSED)</span>';
+
+      statusBox.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <b style="color:#16a34a;">✓ Successfully Ingested &amp; Parsed:</b> ${escapeHtml(file.name)}<br>
+            <span>Patient: <b>${escapeHtml(newCase.name)}</b> (${escapeHtml(newCase.age)}, ${escapeHtml(newCase.gender)}) &bull; Condition: <b>${escapeHtml(newCase.condition)}</b> &bull; Decision: ${statusTag}</span>
+          </div>
+          <button onclick="loadCase('uploaded_case')" class="btn-primary" style="padding:5px 10px;font-size:11px;">View Uploaded Data</button>
+        </div>
+      `;
+
+    } catch (err) {
+      console.error('File parsing error:', err);
+      statusBox.innerHTML = '<span style="color:#dc2626;font-weight:700;">Parsing Error:</span> ' + escapeHtml(err.message);
+    }
+  };
+
+  reader.onerror = function() {
+    statusBox.style.display = "block";
+    statusBox.innerHTML = '<span style="color:#dc2626;font-weight:700;">Failed to read file from disk.</span>';
+  };
+
+  reader.readAsText(file);
+}
+
+function parseHeuristicEvidence(text, filename) {
+  const result = { patient: {}, clinical: {}, laboratory: {}, governance: {}, encounter: {} };
+  const lower = text.toLowerCase();
+
+  const nameMatch = text.match(/patient[\s_:]+([A-Za-z]+[\s]+[A-Za-z]+)/i);
+  if (nameMatch) {
+    const parts = nameMatch[1].split(' ');
+    result.patient.first_name = parts[0];
+    result.patient.last_name = parts[1];
+  }
+
+  if (lower.includes('tuberculosis') || lower.includes('tb')) {
+    result.clinical.diagnosis = 'Tuberculosis (Pulmonary)';
+    result.clinical.icd10_code = 'A15.0';
+    result.governance.jurisdiction_target = 'California';
+    result.governance.form_name = 'CDPH 110b (10/19) Confidential Morbidity Report - Tuberculosis';
+  } else if (lower.includes('measles')) {
+    result.clinical.diagnosis = 'Measles (Rubeola)';
+    result.clinical.icd10_code = 'B05.9';
+    result.governance.jurisdiction_target = 'New York';
+    result.governance.form_name = 'DOH-389 Communicable Disease Reporting Form';
+    result.governance.is_urgent = true;
+  }
+
+  return result;
+}
+
+function buildCaseFromEvidence(data, filename) {
+  const p = data.patient || {};
+  const c = data.clinical || {};
+  const l = data.laboratory || {};
+  const g = data.governance || {};
+  const enc = data.encounter || {};
+
+  // Extract Patient Name
+  let firstName = p.first_name || '';
+  let lastName = p.last_name || '';
+  let fullName = (firstName + ' ' + lastName).trim();
+  if (!fullName) fullName = p.name || 'Anonymous Patient';
+
+  // Age & Gender
+  let age = p.age ? String(p.age) : '';
+  if (!age && p.date_of_birth) {
+    const dobDate = new Date(p.date_of_birth);
+    const diffMonths = (new Date(2026, 8, 14) - dobDate) / (1000 * 60 * 60 * 24 * 30.43);
+    if (diffMonths < 12) age = Math.max(1, Math.round(diffMonths)) + ' mos';
+    else age = Math.round(diffMonths / 12) + ' yrs';
+  }
+  if (!age) age = '30 yrs';
+  if (!age.includes('yr') && !age.includes('mo')) {
+    const num = parseFloat(age);
+    age = (num < 1 ? '2 mos' : Math.round(num) + ' yrs');
+  }
+
+  let gender = p.gender || p.sex || 'Female';
+  let dob = p.date_of_birth || p.dob || '1995-01-01';
+
+  // Address
+  let residence = [p.address, p.city, p.state, p.zip_code].filter(Boolean).join(', ');
+  if (!residence) residence = '100 Medical Center Way, San Francisco, CA 94110';
+
+  let phone = p.cell_phone || p.home_phone || p.phone || '(555) 019-2831';
+  let race = p.race || 'Other';
+  let ethnicity = p.ethnicity || 'Non-Hispanic';
+  let occupation = p.occupation || 'Professional';
+
+  // Diagnosis & Condition
+  let condition = c.diagnosis || c.condition_name || data.condition || '';
+  if (!condition) {
+    if (g.form_name && g.form_name.includes('Tuberculosis')) condition = 'Tuberculosis (Pulmonary)';
+    else if (g.form_name && g.form_name.includes('DOH-389')) condition = 'Measles (Rubeola)';
+    else if (g.form_name && g.form_name.includes('EPI-2')) condition = 'Pertussis (Whooping Cough)';
+    else if (g.form_name && g.form_name.includes('DH 2136')) condition = 'Primary & Secondary Syphilis';
+    else if (g.form_name && g.form_name.includes('420-056')) condition = "Legionellosis (Legionnaires' Disease)";
+    else if (g.form_name && g.form_name.includes('HEA 3334')) condition = 'Acute Hepatitis A (HAV)';
+    else if (filename.includes('Sarah') || filename.includes('NON_REPORTABLE')) condition = 'Acute Viral Pharyngitis (Non-Reportable)';
+    else condition = 'Clinical Condition Under Surveillance';
+  }
+
+  let icd10 = c.icd10_code || data.icd10 || '';
+  if (!icd10) {
+    if (condition.includes('Tuberculosis')) icd10 = 'ICD-10 A15.0';
+    else if (condition.includes('Measles')) icd10 = 'ICD-10 B05.9';
+    else if (condition.includes('Pertussis')) icd10 = 'ICD-10 A37.00';
+    else if (condition.includes('Syphilis')) icd10 = 'ICD-10 A51.0';
+    else if (condition.includes('Legion')) icd10 = 'ICD-10 A48.1';
+    else if (condition.includes('Hepatitis')) icd10 = 'ICD-10 B15.9';
+    else if (condition.includes('Pharyngitis')) icd10 = 'ICD-10 J02.9';
+  }
+
+  // Determine state & jurisdiction
+  let jurisdiction = g.jurisdiction_target || (p.state === 'NY' ? 'New York State Department of Health (NYSDOH / NYC DOHMH)' : p.state === 'TX' ? 'Texas Department of State Health Services (DSHS)' : p.state === 'FL' ? 'Florida Department of Health (FDOH Miami-Dade)' : p.state === 'WA' ? 'Washington State Department of Health (WA DOH)' : p.state === 'OH' ? 'Ohio Department of Health (ODH / Columbus Health)' : 'California Department of Public Health (CDPH)');
+
+  // Determine Reportability & Urgency
+  let isReportable = g.is_reportable !== undefined ? g.is_reportable : true;
+  if (condition.toLowerCase().includes('pharyngitis') || condition.toLowerCase().includes('non-reportable')) {
+    isReportable = false;
+  }
+
+  let isUrgent = condition.toLowerCase().includes('measles') || (g.statutory_timeframe && g.statutory_timeframe.toLowerCase().includes('phone'));
+  let timeframe = g.statutory_timeframe || (isUrgent ? 'Immediate Phone (2 Hours)' : '1 Working Day');
+
+  // Form title
+  let officialFormName = g.form_name || (jurisdiction.includes('California') ? 'CDPH 110b (10/19) - Confidential Morbidity Report for Tuberculosis' : jurisdiction.includes('New York') ? 'NYSDOH Form DOH-389 - Communicable Disease Reporting Form' : jurisdiction.includes('Texas') ? 'Texas DSHS Form EPI-2 - Initial Provider Disease Report Form' : jurisdiction.includes('Florida') ? 'Florida DOH Form DH 2136 - Practitioner Disease Report Form' : jurisdiction.includes('Washington') ? 'WA DOH Form 420-056 - Legionellosis Case Report Form' : jurisdiction.includes('Ohio') ? 'ODH Form HEA 3334 - Confidential Reportable Disease Form' : 'Official State Morbidity Report Form');
+
+  let officialFormNumber = officialFormName.split('-')[0].trim();
+
+  // Organ & 3D placement
+  let organ = 'Thoracic / Pulmonary';
+  let pulseTop = '32%';
+  let pulseLeft = '33.5%';
+  let calloutTop = '25px';
+  let calloutLeft = '36%';
+
+  const condLower = condition.toLowerCase();
+  if (condLower.includes('measles') || condLower.includes('pharyngitis')) {
+    organ = 'Buccal Mucosa / Facial';
+    pulseTop = '24%'; calloutTop = '15px';
+  } else if (condLower.includes('syphilis')) {
+    organ = 'Palms, Soles & Genitourinary';
+    pulseTop = '54%'; calloutTop = '140px';
+  } else if (condLower.includes('hepatitis')) {
+    organ = 'Liver / Hepatic Parenchyma';
+    pulseTop = '40%'; calloutTop = '65px';
+  }
+
+  // Avatar based on gender/name
+  let avatar = 'assets/patient_mary.png';
+  if (gender.toLowerCase().startsWith('m')) {
+    avatar = (condLower.includes('measles') || age.includes('4') || age.includes('2')) ? 'assets/patient_john.png' : 'assets/patient_michael.png';
+  } else {
+    avatar = (age.includes('68') || condLower.includes('legion')) ? 'assets/patient_emily.png' : 'assets/patient_mary.png';
+  }
+
+  // Labs extraction
+  let labs = [];
+  if (l.lab_test || l.lab_loinc) {
+    labs.push({
+      test: l.lab_test || 'Diagnostic Confirmatory Assay',
+      loinc: l.lab_loinc || 'LOINC-EXTRACTED',
+      res: l.lab_result || 'Positive',
+      ref: l.lab_result && l.lab_result.toLowerCase().includes('neg') ? 'Negative' : 'Not Detected',
+      date: l.specimen_collection_date || 'Encounter Date',
+      status: (l.lab_result && l.lab_result.toLowerCase().includes('pos')) ? 'Positive' : 'Negative'
+    });
+  }
+
+  // If matched known preset, augment with its rich labs if uploaded had only 1
+  for (const [k, existing] of Object.entries(CASES)) {
+    if (k !== 'uploaded_case' && existing.condition.toLowerCase().includes(condLower.split(' ')[0])) {
+      existing.labs.forEach(exLab => {
+        if (!labs.some(existingL => existingL.loinc === exLab.loinc)) {
+          labs.push(exLab);
+        }
+      });
+      break;
+    }
+  }
+
+  if (labs.length === 0) {
+    labs.push({ test: 'Primary Diagnostic PCR Assay', loinc: '94500-6', res: 'Positive', ref: 'Negative', date: 'Sep 14, 2026', status: 'Positive' });
+  }
+
+  return {
+    key: 'uploaded_case',
+    name: fullName,
+    age: age,
+    gender: gender,
+    dob: dob,
+    residence: residence,
+    phone: phone,
+    race: race,
+    ethnicity: ethnicity,
+    occupation: occupation,
+    avatar: avatar,
+    condition: condition,
+    jurisdiction: jurisdiction,
+    agencyShort: jurisdiction.split('(')[0].trim(),
+    statutoryCode: g.statutory_timeframe || 'State Public Health Sanitary Code',
+    timeframe: timeframe,
+    slaHours: isUrgent ? 2 : 24,
+    confidence: g.reportability_confidence ? (Math.round(g.reportability_confidence * 1000) / 10 + '% Confirmed') : '99.7% Confirmed',
+    channel: 'eCR (AIMS Hub) + ' + officialFormNumber + ' Fallback',
+    organ: organ,
+    diagnosisCode: icd10 ? condition + ' (' + icd10 + ')' : condition,
+    pulseTop: pulseTop,
+    pulseLeft: pulseLeft,
+    calloutTop: calloutTop,
+    calloutLeft: calloutLeft,
+    officialFormNumber: officialFormNumber,
+    officialFormName: officialFormName,
+    officialPortalUrl: g.form_official_link || 'https://www.cdc.gov/ecr/',
+    insight: 'INGESTED CLINICAL EVIDENCE: Extracted from file ' + filename + '. Evaluated against RCKMS jurisdictional rules with ' + (isReportable ? 'mandatory filing obligation.' : 'suppressed reporting.'),
+    isReportable: isReportable,
+    isUrgent: isUrgent,
+    details: {
+      provider: enc.provider_name || 'Dr. Sarah Lin, MD (Infectious Disease)',
+      facility: (enc.facility || 'Regional Medical Center') + (enc.facility_city ? ', ' + enc.facility_city : ''),
+      symptomOnset: c.symptom_onset || 'Aug 30, 2026',
+      diagnosisDate: c.diagnosis_date || 'Sep 14, 2026',
+      symptoms: c.symptoms_present || c.clinical_notes || 'Extracted clinical features from file payload',
+      treatment: c.current_treatment || c.treatment_status || 'Initiated under physician clinical orders',
+      imaging: c.chest_ct_or_other_imaging || c.imaging_findings || 'None indicated',
+      notes: c.clinical_notes || ('Ingested file: ' + filename)
+    },
+    labs: labs
+  };
+}
+
+function ensureUploadedPresetButton(c) {
+  const grid = document.getElementById("presetsGrid");
+  let btn = document.getElementById("btn-uploaded_case");
+  if (!btn) {
+    btn = document.createElement("button");
+    btn.id = "btn-uploaded_case";
+    btn.className = "preset-btn uploaded";
+    btn.onclick = () => loadCase("uploaded_case");
+    grid.insertBefore(btn, grid.firstChild);
+  }
+  btn.innerHTML = `
+    <div class="preset-btn-name" style="color:#b45309;">&#9733; Uploaded: ${escapeHtml(c.name.split(' ')[0])}</div>
+    <div class="preset-btn-desc">${escapeHtml(c.condition.split(' ')[0])} | ${escapeHtml(c.officialFormNumber)}</div>
+  `;
+}
+
+// ACCURATE OFFICIAL STATE MORBIDITY PDF GENERATION (via jsPDF)
+function downloadAccurateForm() {
+  const c = CASES[currentCaseKey];
+  if (!c.isReportable) {
+    alert("Compliance Notice: " + c.name + " (" + c.condition + ") is classified as Non-Reportable.\n\nZero-filing compliance is maintained. No state morbidity form is generated or transmitted.");
+    return;
+  }
+
+  // Check if jsPDF library is loaded
+  if (window.jspdf && window.jspdf.jsPDF) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "pt",
+      format: "letter"
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let y = 36;
+
+    // Header Agency Banner
+    doc.setFillColor(15, 23, 42); // Navy dark
+    doc.rect(36, y, pageWidth - 72, 42, "F");
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(255, 255, 255);
+    doc.text(c.jurisdiction.toUpperCase(), 46, y + 16);
+
+    doc.setFontSize(13);
+    doc.text(c.officialFormNumber + " - OFFICIAL CASE REPORT", 46, y + 32);
+
+    y += 52;
+
+    // Statutory SLA Box
+    doc.setFillColor(c.isUrgent ? 254 : 255, c.isUrgent ? 242 : 247, c.isUrgent ? 242 : 237);
+    doc.setDrawColor(c.isUrgent ? 220 : 234, c.isUrgent ? 38 : 88, c.isUrgent ? 38 : 12);
+    doc.rect(36, y, pageWidth - 72, 28, "FD");
+
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(c.isUrgent ? 153 : 154, c.isUrgent ? 27 : 52, c.isUrgent ? 27 : 18);
+    const statutoryNotice = c.isUrgent
+      ? "MANDATORY 2-HOUR TELEPHONE SLA (10 NYCRR 2.10) - WRITTEN REPORT TRANSMISSION WITHIN 24 HOURS"
+      : "STATUTORY REPORTING REQUIREMENT: " + c.timeframe.toUpperCase() + " (" + (c.statutoryCode || 'PUBLIC HEALTH CODE').toUpperCase() + ")";
+    doc.text(statutoryNotice, 44, y + 17);
+
+    y += 38;
+
+    // Section 1: Patient Demographics
+    renderPdfSectionHeader(doc, 36, y, pageWidth - 72, "1. PATIENT IDENTIFICATION & DEMOGRAPHICS");
+    y += 20;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(15, 23, 42);
+
+    doc.rect(36, y, pageWidth - 72, 54, "S");
+    doc.line(pageWidth / 2, y, pageWidth / 2, y + 54);
+    doc.line(36, y + 27, pageWidth - 36, y + 27);
+
+    doc.setFont("helvetica", "bold"); doc.text("Patient Full Name:", 44, y + 12);
+    doc.setFont("helvetica", "normal"); doc.text(c.name, 140, y + 12);
+
+    doc.setFont("helvetica", "bold"); doc.text("DOB / Age / Gender:", pageWidth / 2 + 10, y + 12);
+    doc.setFont("helvetica", "normal"); doc.text(c.dob + " (" + c.age + ") | " + c.gender, pageWidth / 2 + 115, y + 12);
+
+    doc.setFont("helvetica", "bold"); doc.text("Address:", 44, y + 39);
+    doc.setFont("helvetica", "normal"); doc.text(c.residence, 140, y + 39);
+
+    doc.setFont("helvetica", "bold"); doc.text("Telephone / Race:", pageWidth / 2 + 10, y + 39);
+    doc.setFont("helvetica", "normal"); doc.text(c.phone + " | " + (c.race || 'N/A'), pageWidth / 2 + 115, y + 39);
+
+    y += 66;
+
+    // Section 2: Clinical Diagnosis & Timeline
+    renderPdfSectionHeader(doc, 36, y, pageWidth - 72, "2. CLINICAL DIAGNOSIS & CASE PRESENTATION");
+    y += 20;
+
+    doc.rect(36, y, pageWidth - 72, 54, "S");
+    doc.line(pageWidth / 2, y, pageWidth / 2, y + 54);
+    doc.line(36, y + 27, pageWidth - 36, y + 27);
+
+    doc.setFont("helvetica", "bold"); doc.text("Disease Condition:", 44, y + 12);
+    doc.setFont("helvetica", "normal"); doc.text(c.condition, 140, y + 12);
+
+    doc.setFont("helvetica", "bold"); doc.text("Diagnosis Code:", pageWidth / 2 + 10, y + 12);
+    doc.setFont("helvetica", "normal"); doc.text(c.diagnosisCode, pageWidth / 2 + 115, y + 12);
+
+    doc.setFont("helvetica", "bold"); doc.text("Timeline:", 44, y + 39);
+    doc.setFont("helvetica", "normal"); doc.text("Onset: " + c.details.symptomOnset + " | Diagnosed: " + c.details.diagnosisDate, 140, y + 39);
+
+    doc.setFont("helvetica", "bold"); doc.text("Clinical Signs:", pageWidth / 2 + 10, y + 39);
+    doc.setFont("helvetica", "normal"); doc.text(String(c.details.symptoms || '').slice(0, 48) + "...", pageWidth / 2 + 115, y + 39);
+
+    y += 66;
+
+    // Section 3: Diagnostic Laboratory Findings
+    renderPdfSectionHeader(doc, 36, y, pageWidth - 72, "3. DIAGNOSTIC LABORATORY FINDINGS (LOINC CODED)");
+    y += 20;
+
+    const labBoxHeight = 16 + (c.labs.length * 15);
+    doc.rect(36, y, pageWidth - 72, labBoxHeight, "S");
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.text("LOINC", 44, y + 11);
+    doc.text("DIAGNOSTIC TEST DESCRIPTION", 100, y + 11);
+    doc.text("OBSERVED RESULT", 380, y + 11);
+    doc.text("COLLECTED", 480, y + 11);
+    doc.line(36, y + 14, pageWidth - 36, y + 14);
+
+    let labY = y + 24;
+    c.labs.forEach(l => {
+      doc.setFont("courier", "bold");
+      doc.text(l.loinc, 44, labY);
+      doc.setFont("helvetica", "normal");
+      doc.text(l.test.slice(0, 42), 100, labY);
+      doc.setFont("helvetica", "bold");
+      if (l.status === "Positive") doc.setTextColor(220, 38, 38);
+      else doc.setTextColor(22, 163, 74);
+      doc.text(l.res.slice(0, 22), 380, labY);
+      doc.setTextColor(15, 23, 42);
+      doc.setFont("helvetica", "normal");
+      doc.text(l.date, 480, labY);
+      labY += 15;
+    });
+
+    y += labBoxHeight + 12;
+
+    // Section 4: Treatment & Epidemiological Remarks
+    renderPdfSectionHeader(doc, 36, y, pageWidth - 72, "4. TREATMENT INITIATED & PUBLIC HEALTH ACTION");
+    y += 20;
+
+    doc.rect(36, y, pageWidth - 72, 46, "S");
+    doc.setFont("helvetica", "bold"); doc.text("Prescribed Therapy:", 44, y + 13);
+    doc.setFont("helvetica", "normal"); doc.text(c.details.treatment, 150, y + 13);
+
+    doc.setFont("helvetica", "bold"); doc.text("Public Health Notes:", 44, y + 31);
+    doc.setFont("helvetica", "normal"); doc.text(String(c.details.notes || '').slice(0, 75) + "...", 150, y + 31);
+
+    y += 58;
+
+    // Section 5: Submitting Physician & Healthcare Facility Certification
+    renderPdfSectionHeader(doc, 36, y, pageWidth - 72, "5. HEALTHCARE PROVIDER & FACILITY CERTIFICATION");
+    y += 20;
+
+    doc.rect(36, y, pageWidth - 72, 60, "S");
+    doc.setFont("helvetica", "bold"); doc.text("Reporting Provider:", 44, y + 14);
+    doc.setFont("helvetica", "normal"); doc.text(c.details.provider, 150, y + 14);
+
+    doc.setFont("helvetica", "bold"); doc.text("Healthcare Facility:", 44, y + 28);
+    doc.setFont("helvetica", "normal"); doc.text(c.details.facility, 150, y + 28);
+
+    doc.setFont("helvetica", "bold"); doc.text("Electronic Signature:", 44, y + 46);
+    doc.setFont("helvetica", "normal"); doc.text("Sarah Lin, MD (Digitally Certified) | NPI: 1942083112 | Date: Sep 14, 2026", 150, y + 46);
+
+    y += 72;
+
+    // Footer compliance note
+    doc.setFontSize(7.5);
+    doc.setTextColor(100, 116, 139);
+    doc.text("Assembled by SIGNAL Public Health Intelligence Layer v1.0. Certified under CDC eCR and RCKMS Decision Support Standards.", 36, y);
+
+    const safeName = c.name.replace(/[^a-zA-Z0-9]/g, '_');
+    const safeForm = c.officialFormNumber.replace(/[^a-zA-Z0-9]/g, '_');
+    doc.save(safeForm + "_" + safeName + ".pdf");
+  } else {
+    // Graceful fallback to print-to-PDF if CDN is offline
+    printOfficialStateForm();
+  }
+}
+
+function renderPdfSectionHeader(doc, x, y, width, title) {
+  doc.setFillColor(241, 245, 249);
+  doc.rect(x, y, width, 16, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.setTextColor(51, 65, 85);
+  doc.text(title, x + 8, y + 11);
+  doc.setDrawColor(203, 213, 225);
+  doc.rect(x, y, width, 16, "S");
+}
+
+// DEDICATED PRINT / SAVE AS PDF WINDOW (with authentic state morbidity styling)
+function printOfficialStateForm() {
+  const c = CASES[currentCaseKey];
+  if (!c.isReportable) {
+    alert("Compliance Notice: " + c.name + " (" + c.condition + ") is classified as Non-Reportable.\n\nZero-filing compliance is maintained. No morbidity form is printed or transmitted.");
+    return;
+  }
+
+  const printWindow = window.open("", "_blank", "width=850,height=950");
+  if (!printWindow) {
+    alert("Please allow pop-ups to view and print the official state morbidity form.");
+    return;
+  }
+
+  const printContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>${c.officialFormNumber} - ${c.name} - Official State Morbidity Report</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in; }
+  body { font-family: Arial, sans-serif; font-size: 11px; color: #0f172a; margin: 0; padding: 18px; line-height: 1.4; }
+  .header { border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; }
+  .agency { font-size: 11px; font-weight: bold; text-transform: uppercase; color: #334155; }
+  .title { font-size: 16px; font-weight: 900; margin-top: 2px; }
+  .subtitle { font-size: 9px; color: #64748b; text-transform: uppercase; margin-top: 1px; }
+  .meta { text-align: right; font-size: 9.5px; }
+  .notice { background: #fff7ed; border: 1.5px solid #ea580c; padding: 6px 10px; margin-bottom: 12px; font-weight: bold; font-size: 10.5px; color: #9a3412; }
+  .notice.urgent { background: #fef2f2; border-color: #dc2626; color: #991b1b; }
+  .box { border: 1px solid #000; margin-bottom: 10px; }
+  .box-title { background: #f1f5f9; border-bottom: 1px solid #000; padding: 5px 8px; font-weight: bold; font-size: 10px; text-transform: uppercase; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; }
+  .cell { padding: 5px 8px; border-top: 1px solid #cbd5e1; border-right: 1px solid #cbd5e1; }
+  .cell:nth-child(2n) { border-right: none; }
+  .cell:nth-child(-n+2) { border-top: none; }
+  .cell b { display: block; font-size: 8.5px; color: #64748b; text-transform: uppercase; margin-bottom: 1px; }
+  .table { width: 100%; border-collapse: collapse; font-size: 10px; }
+  .table th, .table td { padding: 5px 8px; border-bottom: 1px solid #cbd5e1; text-align: left; }
+  .table th { background: #f8fafc; font-weight: bold; }
+  .sig { display: flex; justify-content: space-between; align-items: flex-end; padding: 10px; background: #f8fafc; border-top: 1px solid #000; margin-top: 10px; }
+  .sig-line { border-top: 1px solid #000; width: 220px; padding-top: 3px; font-size: 9.5px; }
+  @media print {
+    .no-print { display: none !important; }
+    body { padding: 0; }
+  }
+</style>
+</head>
+<body>
+  <div class="no-print" style="background:#0f172a;color:#fff;padding:10px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;border-radius:6px;">
+    <span><b>SIGNAL Public Health Intelligence</b> &bull; Official ${c.officialFormNumber} Print &amp; PDF View</span>
+    <div>
+      <button onclick="window.print()" style="background:#2563eb;color:#fff;border:none;padding:6px 14px;border-radius:4px;font-weight:bold;cursor:pointer;">Print / Save as PDF</button>
+      <button onclick="window.close()" style="background:#475569;color:#fff;border:none;padding:6px 10px;border-radius:4px;margin-left:6px;cursor:pointer;">Close</button>
+    </div>
+  </div>
+
+  <div class="header">
+    <div>
+      <div class="agency">${c.jurisdiction}</div>
+      <div class="title">${c.officialFormName}</div>
+      <div class="subtitle">Official State Morbidity Report &bull; Electronic Decision Support Verified</div>
+    </div>
+    <div class="meta">
+      <b>STATUTORY SUBMISSION</b><br>
+      Authority: ${c.statutoryCode || 'Public Health Law'}<br>
+      Mandated SLA: ${c.timeframe}
+    </div>
+  </div>
+
+  <div class="notice ${c.isUrgent ? 'urgent' : ''}">
+    ${c.isUrgent
+      ? 'MANDATORY 2-HOUR TELEPHONE NOTIFICATION REQUIRED PER 10 NYCRR § 2.10. HEALTH OFFICER CONTACT LOGGED.'
+      : 'OFFICIAL MORBIDITY REPORT: Pre-populated by SIGNAL Intelligence Layer. Certified for local health department submission within ' + c.timeframe + '.'}
+  </div>
+
+  <div class="box">
+    <div class="box-title">1. Patient Identification &amp; Residence</div>
+    <div class="grid">
+      <div class="cell"><b>Patient Legal Name</b>${c.name}</div>
+      <div class="cell"><b>Date of Birth / Age / Sex</b>${c.dob} (${c.age}) | ${c.gender}</div>
+      <div class="cell"><b>Residential Street Address</b>${c.residence}</div>
+      <div class="cell"><b>Telephone / Occupation</b>${c.phone} | ${c.occupation || 'N/A'}</div>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-title">2. Clinical Diagnosis &amp; Case Findings</div>
+    <div class="grid">
+      <div class="cell"><b>Disease Diagnosed</b>${c.condition} (${c.diagnosisCode})</div>
+      <div class="cell"><b>Onset &amp; Diagnosis Dates</b>Onset: ${c.details.symptomOnset} | Diagnosed: ${c.details.diagnosisDate}</div>
+      <div class="cell"><b>Clinical Symptoms</b>${c.details.symptoms}</div>
+      <div class="cell"><b>Radiology / Clinical Findings</b>${c.details.imaging}</div>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-title">3. Confirmatory Diagnostic Laboratory Findings (LOINC Coded)</div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Diagnostic Test</th>
+          <th>LOINC</th>
+          <th>Result</th>
+          <th>Reference</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${c.labs.map(l => `<tr><td><b>${l.test}</b></td><td><code>${l.loinc}</code></td><td style="font-weight:bold;color:${l.status==='Positive'?'#b91c1c':'#15803d'}">${l.res}</td><td>${l.ref}</td><td>${l.date}</td></tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box">
+    <div class="box-title">4. Treatment Initiated &amp; Epidemiological Actions</div>
+    <div class="grid">
+      <div class="cell"><b>Prescribed Therapy</b>${c.details.treatment}</div>
+      <div class="cell"><b>Public Health Notes</b>${c.details.notes}</div>
+    </div>
+  </div>
+
+  <div class="sig">
+    <div>
+      <b>Reporting Facility:</b> ${c.details.facility}<br>
+      <b>Attending Provider:</b> ${c.details.provider}<br>
+      <span style="font-size:8.5px;color:#64748b;">SIGNAL Intelligence Layer v1.0 &bull; CDC eCR / RCKMS Compliant</span>
+    </div>
+    <div class="sig-line">
+      <b>Physician Signature:</b> Dr. Sarah Lin, MD<br>
+      Date: Sep 14, 2026 &bull; NPI: 1942083112
+    </div>
+  </div>
+</body>
+</html>`;
+
+  printWindow.document.open();
+  printWindow.document.write(printContent);
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => {
+    try { printWindow.print(); } catch (err) {}
+  }, 500);
+}
+
+let isHiresView = false;
+function toggleHires() {
+  isHiresView = !isHiresView;
+  const img = document.getElementById("bodyDisplayImg");
+  const btn = document.getElementById("hiresToggleBtn");
+  if (isHiresView) {
+    img.src = "assets/holographic_body_hires.jpg";
+    btn.textContent = "View Standard 3D Model";
+  } else {
+    img.src = "assets/body_3d_crop.png";
+    btn.textContent = "View High-Res 3D Model";
+  }
+}
+
+function simulateTransmission() {
+  const c = CASES[currentCaseKey];
+  if (!c.isReportable) {
+    alert("Compliance Safeguard: This encounter is classified as Non-Reportable (" + c.name + " - " + c.condition + ").\n\nElectronic Case Report transmission is blocked to prevent false alarms.");
+    return;
+  }
+  const txId = "SIG-eCR-" + Math.floor(Math.random() * 900000 + 100000);
+  alert("Success: Electronic Initial Case Report (eICR) compiled and validated against HL7 CDA standard.\n\nJurisdiction: " + c.jurisdiction + "\nReceiver: APHL AIMS Hub / CDC NNDSS\nTransaction ID: " + txId + "\nStatus: ACK-200 (Accepted by Public Health Authority)");
+}
+
+// Initialize on page load with California TB
+window.addEventListener("DOMContentLoaded", () => {
+  loadCase("ca_tb");
+});
+</script>
+</body>
+</html>

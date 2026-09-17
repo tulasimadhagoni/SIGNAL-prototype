@@ -1,0 +1,90 @@
+﻿{
+    "encounter":  {
+                      "provider_name":  "Dr. Michael Vance, MD (Pulmonary \u0026 Critical Care)",
+                      "provider_npi":  "1930281745",
+                      "facility_city":  "Seattle",
+                      "provider_fax":  "206-555-4015",
+                      "admission_date":  "2026-09-13T18:45:00-07:00",
+                      "encounter_id":  "ENC-2026-WA-1092",
+                      "facility_address":  "747 Broadway",
+                      "facility_state":  "WA",
+                      "facility_zip":  "98122",
+                      "facility":  "Swedish Medical Center - First Hill Campus",
+                      "provider_phone":  "206-555-4000"
+                  },
+    "provenance":  {
+                       "event_timestamp":  "2026-09-14T09:12:00-07:00",
+                       "source_system":  "Epic Systems - Providence Swedish Health",
+                       "facility_id":  "WA-SEA-98104",
+                       "sha256_hash":  "f1092837bc9910294817aefc091823746152bcdef01928374a56b20199e4b7c1",
+                       "patient_mpi":  "MPI-WA-9041285"
+                   },
+    "patient":  {
+                    "ethnicity":  "Non-Hispanic/Non-Latino",
+                    "middle_initial":  "P",
+                    "zip_code":  "98109",
+                    "country_of_birth":  "United States",
+                    "date_of_birth":  "1958-03-22",
+                    "age":  68,
+                    "pregnant":  "No",
+                    "race":  "White",
+                    "address":  "812 5th Avenue North, Apt 301",
+                    "primary_language":  "English",
+                    "gender":  "Female",
+                    "sex":  "Female",
+                    "cell_phone":  "206-555-0164",
+                    "state":  "WA",
+                    "home_phone":  "206-555-0131",
+                    "city":  "Seattle",
+                    "email":  "eleanor.rigby@example.org",
+                    "occupation":  "Retired (Volunteer at Senior Community Center)",
+                    "first_name":  "Eleanor",
+                    "last_name":  "Rigby"
+                },
+    "governance":  {
+                       "form_name":  "DOH Form 420-056 (Legionellosis Case Report Form)",
+                       "signal_action":  "DISPATCH_24H_EICR_AND_TRIGGER_ENVIRONMENTAL_INSPECTION_TASK",
+                       "is_reportable":  true,
+                       "reportability_confidence":  0.998,
+                       "form_official_link":  "https://doh.wa.gov/sites/default/files/legacy/Documents/5100/420-056-ReportForm-Legionellosis.pdf",
+                       "cluster_risk_alert":  "POTENTIAL_COMMERCIAL_COOLING_TOWER_EXPOSURE",
+                       "jurisdiction_target":  "Washington",
+                       "public_health_agency":  "Public Health - Seattle \u0026 King County / Washington State Department of Health (DOH)",
+                       "statutory_timeframe":  "Within 24 hours (WAC 246-101-101)"
+                   },
+    "laboratory":  {
+                       "specimen_type":  "Urine \u0026 Bronchoalveolar Lavage (BAL)",
+                       "lab_test":  "Legionella pneumophila Urine Antigen Assay (EIA)",
+                       "routine_sputum_culture":  "No growth of routine bacterial pathogens at 48 hours",
+                       "lab_result":  "Positive (Legionella pneumophila Serogroup 1 Antigen Detected)",
+                       "laboratory_zip":  "98122",
+                       "lab_loinc":  "29553-5",
+                       "bal_legionella_pcr":  "Positive (Legionella pneumophila DNA)",
+                       "laboratory_city":  "Seattle",
+                       "laboratory_name":  "Swedish Hospital Microbiology Lab \u0026 UW Medicine Virology",
+                       "laboratory_state":  "WA",
+                       "laboratory_clia":  "50D0623910",
+                       "date_first_specimen_collection":  "2026-09-13",
+                       "specimen_date":  "2026-09-13"
+                   },
+    "case_id":  "SIG-CASE-2026-WA005",
+    "clinical":  {
+                     "imaging_findings":  "Chest CT reveals extensive dense consolidation of right lower and middle lobes with bilateral pleural effusions",
+                     "laboratory_anomalies":  "Severe Hyponatremia (Serum Na 127 mEq/L), Elevated AST/ALT and Ferritin \u003e1,800 ng/mL",
+                     "clinical_notes":  "68-year-old female admitted with severe toxic pneumonia, hypoxemia, acute encephalopathy, and marked hyponatremia. Urine Legionella antigen returned strongly positive. History of hotel hot tub / HVAC cooling tower exposure flags high suspicion for environmental source. Notified King County Epidemiology immediately.",
+                     "icd10_code":  "A48.1",
+                     "potential_exposure_source":  "Attended 3-day conference and spa at downtown Seattle hotel 6 days prior to onset (September 2-4, 2026)",
+                     "diagnosis_date":  "2026-09-14",
+                     "current_treatment":  "IV Levofloxacin 750 mg daily + supportive supplemental oxygen",
+                     "snomed_code":  "80648002",
+                     "symptom_onset":  "2026-09-08",
+                     "diagnosis":  "Legionellosis (Legionnaires\u0027 Disease with Acute Respiratory Failure)",
+                     "symptoms_present":  [
+                                              "Severe Community-Acquired Pneumonia",
+                                              "High Unremitting Fever (104.2 F)",
+                                              "Acute Confusion / Delirium",
+                                              "Watery Diarrhea \u0026 Nausea",
+                                              "Severe Dyspnea requiring 4L Nasal Cannula"
+                                          ]
+                 }
+}

@@ -1,0 +1,88 @@
+﻿{
+    "encounter":  {
+                      "provider_name":  "Dr. Anthony Morales, MD (Infectious Diseases)",
+                      "provider_npi":  "1492019982",
+                      "facility_city":  "Miami",
+                      "provider_fax":  "305-555-6715",
+                      "admission_date":  "2026-09-11T13:00:00-04:00",
+                      "encounter_id":  "ENC-2026-FL-5510",
+                      "facility_address":  "1611 NW 12th Ave",
+                      "facility_state":  "FL",
+                      "facility_zip":  "33136",
+                      "facility":  "Miami-Dade Infectious Disease \u0026 Wellness Clinic",
+                      "provider_phone":  "305-555-6700"
+                  },
+    "provenance":  {
+                       "event_timestamp":  "2026-09-11T15:40:00-04:00",
+                       "source_system":  "AthenaHealth EHR - South Florida Specialty Network",
+                       "facility_id":  "FL-MIA-33136",
+                       "sha256_hash":  "b71940192837bc9910294817aefc091823746152bcdef01928374a56b20199e4",
+                       "patient_mpi":  "MPI-FL-3391048"
+                   },
+    "patient":  {
+                    "ethnicity":  "Non-Hispanic/Non-Latino",
+                    "middle_initial":  "D",
+                    "zip_code":  "33136",
+                    "country_of_birth":  "United States",
+                    "date_of_birth":  "1998-11-23",
+                    "age":  27,
+                    "pregnant":  "No",
+                    "race":  "Black or African American",
+                    "address":  "1420 NW 2nd Ave, Apt 503",
+                    "primary_language":  "English",
+                    "gender":  "Male",
+                    "sex":  "Male",
+                    "cell_phone":  "786-555-0195",
+                    "state":  "FL",
+                    "home_phone":  "305-555-0142",
+                    "city":  "Miami",
+                    "email":  "marcus.vance@example.net",
+                    "occupation":  "Hospitality / Hotel Front Desk Supervisor",
+                    "first_name":  "Marcus",
+                    "last_name":  "Vance"
+                },
+    "governance":  {
+                       "jurisdiction_target":  "Florida",
+                       "form_official_link":  "https://www.floridahealth.gov/diseases-and-conditions/disease-reporting-and-management/disease-reporting-and-surveillance/surveillance-and-reporting-forms/_documents/practitioner-disease-report-form.pdf",
+                       "public_health_agency":  "Florida Department of Health in Miami-Dade County (FDOH)",
+                       "signal_action":  "TRANSMIT_EICR_AND_NOTIFY_DIS_UNIT",
+                       "statutory_timeframe":  "Next business day (Fla. Admin. Code R. 64D-3.029)",
+                       "is_reportable":  true,
+                       "form_name":  "DH 2136 Practitioner Disease Report Form / DH 720 STI Confidential Report",
+                       "reportability_confidence":  0.999
+                   },
+    "laboratory":  {
+                       "specimen_type":  "Serum",
+                       "lab_test":  "Syphilis Serology (Reverse Screening Protocol: TP-PA and Quantitative RPR)",
+                       "lab_result":  "Reactive / Positive",
+                       "laboratory_zip":  "33025",
+                       "lab_loinc":  "20507-0",
+                       "previous_serology":  "Non-reactive 14 months prior (Documented Seroconversion)",
+                       "laboratory_city":  "Miramar",
+                       "laboratory_name":  "Quest Diagnostics Nichols Institute Miami",
+                       "laboratory_state":  "FL",
+                       "laboratory_clia":  "10D0284918",
+                       "treponema_pallidum_pa":  "Reactive (Confirmed)",
+                       "rpr_quantitative_titer":  "Reactive at 1:64 dilution (High Titer)",
+                       "date_first_specimen_collection":  "2026-09-11",
+                       "specimen_date":  "2026-09-11"
+                   },
+    "case_id":  "SIG-CASE-2026-FL004",
+    "clinical":  {
+                     "treatment_status":  "Treated during visit",
+                     "clinical_notes":  "27-year-old male presents with 2-week history of painless genital lesion. Physical examination demonstrates classic 1.2 cm indurated chancre on coronal sulcus and early macular lesions on palmar surfaces. Administered 2.4 MU Bicillin L-A IM. Partner notification counseling provided. Forwarded to FDOH Disease Intervention Specialists (DIS) for expedited contact tracing.",
+                     "current_treatment":  "Benzathine Penicillin G 2.4 million units IM single dose",
+                     "icd10_code":  "A51.0",
+                     "date_treatment_initiated":  "2026-09-11",
+                     "clinical_presentation":  [
+                                                   "Single painless, indurated penile ulcer with clean base (chancre)",
+                                                   "Bilateral non-tender rubbery inguinal lymphadenopathy",
+                                                   "Faint copper-colored maculopapular rash on bilateral palms and soles"
+                                               ],
+                     "diagnosis_date":  "2026-09-11",
+                     "hiv_status":  "Negative (Rapid 4th Gen Ag/Ab Non-Reactive)",
+                     "snomed_code":  "240589008",
+                     "symptom_onset":  "2026-08-28",
+                     "diagnosis":  "Primary and Secondary Syphilis"
+                 }
+}
